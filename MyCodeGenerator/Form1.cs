@@ -160,6 +160,7 @@ namespace MyCodeGenerator
             }
             else
             {
+                //to test;
                 String FirstValue = _columnsInfoForDataAccess[0][0].ColumnName;
                 MessageBox.Show("the Tabel Name =" + FirstValue.Remove(FirstValue.Length - 2));
 
