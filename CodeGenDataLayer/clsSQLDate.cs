@@ -79,7 +79,7 @@ namespace CodeGenDataLayer
           _TempText.Clear();
           _DBName = DBName;
           _ColumnsInfo = ColumnsInfo;          
-          _TableSingleName = _GetSingleColumnName();
+          _TableSingleName = _GetTableName();
             //Get Table Name;
 
             if (!_IsGenerateAllMode)
