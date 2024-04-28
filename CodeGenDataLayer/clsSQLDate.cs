@@ -9,52 +9,40 @@ using System.Xml.Linq;
 using System.Configuration;
 using System.Text;
 using GenerateDataAccessLayerLibrary;
+using System.Runtime.InteropServices;
 
 namespace CodeGenDataLayer
 {
     public class clsSQLDate
     {
-        private static string _TableName;
-        private static string _DBName;
-        private static string _TableSingleName;
+        private static string _tableName;
+        private static string _dbName;
+        private static  string _tableSingleName;
+        private static bool _isLogin;
+        private static  bool _isGenerateAllMode;
+        private static StringBuilder _tempText;
+        private static List<List<clsColumnInfoForDataAccess>> _columnsInfo;
 
-        private static bool _IsLogin;
-        private static bool _IsGenerateAllMode;
-        private static StringBuilder _TempText;
-        private static List<List<clsColumnInfoForDataAccess>> _ColumnsInfo;
-
-
-        static clsSQLDate()
+        public clsSQLDate()
         {
-            _TableName = string.Empty;
-            _DBName=string.Empty;
-            _TableSingleName = string.Empty;
-
-            _IsLogin = false;
-            _IsGenerateAllMode = false;
-            _TempText = new StringBuilder();
-            _ColumnsInfo=new List<List<clsColumnInfoForDataAccess>>();
-
-
-
-
+            _tableName = string.Empty;
+            _dbName = string.Empty;
+            _tableSingleName = string.Empty;
+            _isLogin = false;
+            _isGenerateAllMode = false;
+            _tempText = new StringBuilder();
+            _columnsInfo = new List<List<clsColumnInfoForDataAccess>>();
         }
 
-        private static bool _DoesTableHaveColumn(string ColumnName)
+        private static bool _DoesTableHaveColumn(string columnName)
         {
-            foreach (var row in _ColumnsInfo)
+            foreach (var row in _columnsInfo)
             {
-                // Check if the row is not empty
-                if (row.Count > 0)
+                if (row.Count > 0 && row[0].ColumnName.Equals(columnName, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Access the first item in the row and compare its ColumnName (case-insensitive)
-                    if (row[0].ColumnName.Equals(ColumnName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
-
             return false;
         }
 
@@ -63,56 +51,180 @@ namespace CodeGenDataLayer
             return (_DoesTableHaveColumn("username") && _DoesTableHaveColumn("password"));
         }
 
-        private static String _GetTableName()
+        private static string _GetTableName()
         {
-            
-            if(_ColumnsInfo.Count > 0)
+            if (_columnsInfo.Count > 0)
             {
-                String FirstValue = _ColumnsInfo[0][0].ColumnName;
-                return FirstValue.Remove(FirstValue.Length - 2);
+                string firstValue = _columnsInfo[0][0].ColumnName;
+                return firstValue.Remove(firstValue.Length - 2);
             }
-            return "";
-        }       
-
-        public static string GenerateDataLayer(List<List<clsColumnInfoForDataAccess>> ColumnsInfo, string DBName)
-        {
-          _TempText.Clear();
-          _DBName = DBName;
-          _ColumnsInfo = ColumnsInfo;          
-          _TableSingleName = _GetTableName();
-            //Get Table Name;
-
-            if (!_IsGenerateAllMode)
-            {
-                _IsLogin=_DoesTableHaveUsernameAndPassword();   
-            }
-    _TempText.AppendLine($"using System;\r\n" +
-                $"using System.Data;\r\nusing " +
-                $"System.Data.SqlClient;\r\n\r\nnamespace {_DBName}DataAccessLayer\r\n{{");
-
-            _TempText.Append($"public class cls{_TableSingleName}Data");
-
-            _TempText.AppendLine();
-            _TempText.AppendLine("{");
-
-
-
-
-
-             
-
-            //if(_IsLogin)
-            //{
-
-            //}
-
-
-            _TempText.Append("}");
-            _TempText.Append("\n}");
-
-            return _TempText.ToString();
+            return string.Empty;
         }
-       
+
+        private static string _GetParametersByTableColumns()
+        {
+            StringBuilder parametersBuilder = new StringBuilder();
+
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    string columnName = columnInfo.ColumnName;
+                    string dataType = columnInfo.DataType;
+
+                    if (parametersBuilder.Length != 0)
+                    {
+                        parametersBuilder.Append(", ");
+                    }
+
+                    parametersBuilder.Append($"{dataType} {columnName}");
+                }
+            }
+
+            return parametersBuilder.ToString();
+        }
+
+        private static string _GetConnectionString()
+        {
+            return "SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);";
+        }
+
+        private static string _GetParametersExecuteReaderInMode()
+        {
+            StringBuilder parametersBuilder = new StringBuilder();
+
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    parametersBuilder.Append($"{columnInfo.ColumnName} = " +
+                        $"({columnInfo.DataType})reader[\"{columnInfo.ColumnName}\"], \n");
+                }
+            }
+
+            if (parametersBuilder.Length > 0)
+            {
+                parametersBuilder.Length -= 2;
+            }
+
+            return parametersBuilder.ToString();
+        }
+
+        private  static string _GenerateGetInfoMethodByID()
+        {
+            //add name spacd , ref ,delete the first line;
+            _tempText.Clear();
+            _tempText.AppendLine($"public static bool Get{_GetTableName()}InfoByID({_GetParametersByTableColumns()})");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    bool IsFound = false;");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"   {_GetConnectionString()}");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = @\"select * from {_GetTableName()}" +
+                $" where {_GetTableName()}ID = @{_GetTableName()}ID\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{_GetTableName()}ID\"," +
+                $" {_GetTableName()}ID);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        SqlDataReader reader = command.ExecuteReader();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        if (reader.Read())");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine("            // The record was found");
+            _tempText.AppendLine("            IsFound = true;");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"            {_GetParametersExecuteReaderInMode()}");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("        else");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine("            // The record was not found");
+            _tempText.AppendLine("            IsFound = false;");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        reader.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        IsFound = false;");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return IsFound;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _DataAccessAsLoginInfo()
+        {
+           _GenerateGetInfoMethodByID();
+        //_CreateGetInfoMethodForUsername();
+        //_CreateGetInfoMethodForUsernameAndPassword();
+        //_CreateAddMethod();
+        //_CreateUpdateMethod();
+        //_CreateDeleteMethod();
+        //_CreateExistsMethod();
+        //_CreateExistsMethodForUsername();
+        //_CreateExistsMethodForUsernameAndPassword();
+        //_CreateAllMethod();
+
+            return _tempText.ToString();
+        }
+
+        public static string GenerateDataLayer(List<List<clsColumnInfoForDataAccess>> columnsInfo, string dbName)
+        {
+            // Initialize StringBuilder and other variables
+            _tempText = new StringBuilder();
+            _dbName = dbName;
+            _columnsInfo = columnsInfo;
+            _tableSingleName = _GetTableName();
+
+            // Append using directives
+            _tempText.AppendLine("using System;");
+            _tempText.AppendLine("using System.Data;");
+            _tempText.AppendLine("using System.Data.SqlClient;\r\n");
+
+            // Check if dbName is valid for namespace declaration
+           
+                // Append namespace declaration
+                _tempText.AppendLine($"namespace {_dbName}DataAccessLayer");
+                _tempText.AppendLine("{");
+            
+
+            _tempText.AppendLine($"    public class cls{_tableSingleName}Data");
+            _tempText.AppendLine("    {");
+
+            // Check for additional conditions
+            if (!_isGenerateAllMode)
+            {
+                _isLogin = _DoesTableHaveUsernameAndPassword();
+            }
+
+            // Call method to generate GetInfo method
+            _GenerateGetInfoMethodByID();
+
+            // Close class and namespace declarations if applicable
+            _tempText.AppendLine("    }");
+            if (!string.IsNullOrEmpty(_dbName))
+            {
+                _tempText.AppendLine("}");
+            }
+
+            // Return generated code as string
+            return _tempText.ToString();
+        }
+
+
+
         public static DataTable GetAllDatabaseNames()
         {
             DataTable databaseNames = new DataTable();

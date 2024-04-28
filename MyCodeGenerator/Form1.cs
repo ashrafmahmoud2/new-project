@@ -14,6 +14,28 @@ namespace MyCodeGenerator
         private List<List<clsColumnInfoForDataAccess>>
             _columnsInfoForDataAccess = new List<List<clsColumnInfoForDataAccess>>();
 
+        public void DummyData()
+        {
+            List<Tuple<string, string, bool>> columnInfoList = new List<Tuple<string, string, bool>>();
+
+            // Adding dummy data for 12 records
+            for (int i = 1; i <= 12; i++)
+            {
+                columnInfoList.Add(new Tuple<string, string, bool>($"Column{i}", $"DataType{i}", i % 2 == 0));
+            }
+
+            // Accessing the values
+            foreach (var columnInfo in columnInfoList)
+            {
+                string columnName = columnInfo.Item1;
+                string dataType = columnInfo.Item2;
+                bool isNullable = columnInfo.Item3;
+
+                //    Console.WriteLine($"Column Name: {columnName}, Data Type: {dataType}, Is Nullable: {isNullable}");
+            }
+        }
+
+
         public Form1()
         {
             InitializeComponent();
@@ -161,8 +183,18 @@ namespace MyCodeGenerator
             else
             {
                 //to test;
-                String FirstValue = _columnsInfoForDataAccess[0][0].ColumnName;
-                MessageBox.Show("the Tabel Name =" + FirstValue.Remove(FirstValue.Length - 2));
+                //String FirstValue = _columnsInfoForDataAccess[0][0].ColumnName;
+                //MessageBox.Show("the Tabel Name =" + FirstValue.Remove(FirstValue.Length - 2));
+
+                //to get test ;
+                List<List<clsColumnInfoForDataAccess>> _columnsInfoForDataAccess = new List<List<clsColumnInfoForDataAccess>>();
+                for (int i = 1; i <= 6; i++)
+                {
+                    List<clsColumnInfoForDataAccess> columnInfoList = new List<clsColumnInfoForDataAccess>();
+                    columnInfoList.Add(new clsColumnInfoForDataAccess { ColumnName = $"Column{i}", DataType = $"int{i}", IsNullable = i % 2 == 0 });
+                    _columnsInfoForDataAccess.Add(columnInfoList);
+                }
+
 
                 txtGenText.Text =
                  clsSQL.
