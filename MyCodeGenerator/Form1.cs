@@ -191,7 +191,7 @@ namespace MyCodeGenerator
                 for (int i = 1; i <= 6; i++)
                 {
                     List<clsColumnInfoForDataAccess> columnInfoList = new List<clsColumnInfoForDataAccess>();
-                    columnInfoList.Add(new clsColumnInfoForDataAccess { ColumnName = $"Column{i}", DataType = $"int{i}", IsNullable = i % 2 == 0 });
+                    columnInfoList.Add(new clsColumnInfoForDataAccess { ColumnName = $"Column{i}", DataType = $"int", IsNullable = i % 2 == 0 });
                     _columnsInfoForDataAccess.Add(columnInfoList);
                 }
 

@@ -10,6 +10,10 @@ using System.Configuration;
 using System.Text;
 using GenerateDataAccessLayerLibrary;
 using System.Runtime.InteropServices;
+using System.Linq;
+using System.Collections;
+using System.Diagnostics.Contracts;
+using System.Security.Cryptography;
 
 namespace CodeGenDataLayer
 {
@@ -20,8 +24,12 @@ namespace CodeGenDataLayer
         private static  string _tableSingleName;
         private static bool _isLogin;
         private static  bool _isGenerateAllMode;
-        private static StringBuilder _tempText;
+        public static StringBuilder _tempText;
+         private static  StringBuilder _parametersBuilder ;
         private static List<List<clsColumnInfoForDataAccess>> _columnsInfo;
+        
+
+        
 
         public clsSQLDate()
         {
@@ -61,7 +69,7 @@ namespace CodeGenDataLayer
             return string.Empty;
         }
 
-        private static string _GetParametersByTableColumns()
+        private static string _GetParametersByTableColumns(bool WithRef = false)
         {
             StringBuilder parametersBuilder = new StringBuilder();
 
@@ -77,7 +85,24 @@ namespace CodeGenDataLayer
                         parametersBuilder.Append(", ");
                     }
 
-                    parametersBuilder.Append($"{dataType} {columnName}");
+                    if (WithRef)
+                    {
+                        parametersBuilder.Append($"ref {dataType} {columnName}");
+                    }
+                    else
+                    {
+                        parametersBuilder.Append($"{dataType} {columnName}");
+                    }
+                }
+            }
+
+            if (WithRef)
+            {
+                // Remove the first word from the parameters
+                int index = parametersBuilder.ToString().IndexOf(' ');
+                if (index != -1)
+                {
+                    parametersBuilder.Remove(0, index + 1);
                 }
             }
 
@@ -89,32 +114,99 @@ namespace CodeGenDataLayer
             return "SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);";
         }
 
-        private static string _GetParametersExecuteReaderInMode()
+        private static string _GetParametersExecuteReader()
         {
-            StringBuilder parametersBuilder = new StringBuilder();
+            _parametersBuilder= new StringBuilder();
+            foreach (var columnList in _columnsInfo)
+            {
+               
+                foreach (var columnInfo in columnList)
+                {
+                    // Skip the first column
+
+                    _parametersBuilder.Append($"{columnInfo.ColumnName} = " +
+                           $"({columnInfo.DataType})reader[\"{columnInfo.ColumnName}\"]; \n");
+                    
+                }
+            }
+
+            if (_parametersBuilder.Length > 0)
+            {
+                _parametersBuilder.Length -= 2;
+            }
+
+
+            return _parametersBuilder.ToString();
+        }
+
+        private static string _GetAddWithValueParameters()
+        {
+            _parametersBuilder.Clear();
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    _parametersBuilder.Append($"command.Parameters.AddWithValue(\"@{columnInfo.ColumnName}\", {columnInfo.ColumnName});\n");
+                }
+            }
+
+            return _parametersBuilder.ToString();
+        }
+
+    
+        private static string _GetQueryOfInsert()
+        {
+            string columnNames = "";
+            string parameters = "";
 
             foreach (var columnList in _columnsInfo)
             {
                 foreach (var columnInfo in columnList)
                 {
-                    parametersBuilder.Append($"{columnInfo.ColumnName} = " +
-                        $"({columnInfo.DataType})reader[\"{columnInfo.ColumnName}\"], \n");
+                    // Append column name to columnNames
+                    columnNames += $"{columnInfo.ColumnName}, ";
+
+                    // Append parameter placeholder to parameters
+                    parameters += $"@{columnInfo.ColumnName}, ";
                 }
             }
 
-            if (parametersBuilder.Length > 0)
-            {
-                parametersBuilder.Length -= 2;
-            }
+            columnNames = columnNames.TrimEnd(',', ' ');
+            parameters = parameters.TrimEnd(',', ' ');
 
-            return parametersBuilder.ToString();
+            string insertQuery = $"INSERT INTO {_GetTableName()} ({columnNames}) VALUES ({parameters}); SELECT SCOPE_IDENTITY();";
+
+            return insertQuery;
         }
 
-        private  static string _GenerateGetInfoMethodByID()
+        private static string _GetQueryOfUpdate()
         {
-            //add name spacd , ref ,delete the first line;
-            _tempText.Clear();
-            _tempText.AppendLine($"public static bool Get{_GetTableName()}InfoByID({_GetParametersByTableColumns()})");
+            string setClause = "";
+
+            // Iterate over _columnsInfo to build the SET clause
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    // Append column name and parameter placeholder to the SET clause
+                    setClause += $"{columnInfo.ColumnName} = @{columnInfo.ColumnName}, ";
+                }
+            }
+
+            // Remove the trailing comma and space from setClause
+            setClause = setClause.TrimEnd(',', ' ');
+
+            // Construct the UPDATE query
+            string updateQuery = $"UPDATE {_GetTableName()} SET {setClause} WHERE {_GetTableName()}ID = @{_GetTableName()}ID;";
+
+            return updateQuery;
+        }
+
+
+
+        private static string _GenerateGetInfoMethodByID()
+        {
+            _tempText.AppendLine($"public static bool Get{_GetTableName()}InfoByID({_GetParametersByTableColumns(true)})");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    bool IsFound = false;");
             _tempText.AppendLine("");
@@ -139,7 +231,7 @@ namespace CodeGenDataLayer
             _tempText.AppendLine("            // The record was found");
             _tempText.AppendLine("            IsFound = true;");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"            {_GetParametersExecuteReaderInMode()}");
+            _tempText.AppendLine($"            {_GetParametersExecuteReader()}");
             _tempText.AppendLine("        }");
             _tempText.AppendLine("        else");
             _tempText.AppendLine("        {");
@@ -164,44 +256,403 @@ namespace CodeGenDataLayer
             return _tempText.ToString();
         }
 
-        private static string _DataAccessAsLoginInfo()
+        private static string _GenerateAddMethod()
+        {
+
+
+            _tempText.AppendLine($"public static int AddNew{_GetTableName()}({_GetParametersByTableColumns()}) ");
+            _tempText.AppendLine($"{{    int {_GetTableName()}ID = -1;");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"string query = \"{_GetQueryOfInsert()}\";");
+
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"  {_GetAddWithValueParameters()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        object result = command.ExecuteScalar();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        if (result != null && int.TryParse(result.ToString(), out int InsertID))");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine($"            {_GetTableName()}ID = InsertID;");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    return {_GetTableName()}ID;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateUpdateMethod()
+        {
+            
+                _tempText.AppendLine($"public static bool Update{_GetTableName()}( {_GetParametersByTableColumns()})");
+                _tempText.AppendLine("{");
+                _tempText.AppendLine("    int RowAffected = 0;");
+                _tempText.AppendLine("");
+                _tempText.AppendLine($"    {_GetConnectionString()};");
+                _tempText.AppendLine("");
+                _tempText.AppendLine($"    string query = \"{_GetQueryOfUpdate()}\";");
+                _tempText.AppendLine("");
+                _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+                _tempText.AppendLine("");
+                _tempText.AppendLine($"    {_GetAddWithValueParameters()};");
+                _tempText.AppendLine("");
+                _tempText.AppendLine("    try");
+                _tempText.AppendLine("    {");
+                _tempText.AppendLine("        connection.Open();");
+                _tempText.AppendLine("");
+                _tempText.AppendLine("        RowAffected = command.ExecuteNonQuery();");
+                _tempText.AppendLine("    }");
+                _tempText.AppendLine("    catch (Exception ex)");
+                _tempText.AppendLine("    {");
+                _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+                _tempText.AppendLine("    }");
+                _tempText.AppendLine("    finally");
+                _tempText.AppendLine("    {");
+                _tempText.AppendLine("        connection.Close();");
+                _tempText.AppendLine("    }");
+                _tempText.AppendLine("");
+                _tempText.AppendLine("    return (RowAffected > 0);");
+                _tempText.AppendLine("}");
+                return _tempText.ToString();
+            
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateDeleteMethod()
+        {
+            _tempText.AppendLine($"public static bool Delete{_GetTableName()}(int {_GetTableName()}ID)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    int RowAffected = 0;");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = \"DELETE FROM {_GetTableName()} WHERE {_GetTableName()}ID = @{_GetTableName()}ID\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{_GetTableName()}ID\", {_GetTableName()}ID);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        RowAffected = command.ExecuteNonQuery();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return (RowAffected > 0);");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateExistsMethod()
+        {
+            _tempText.AppendLine($"public static bool IS{_GetTableName()}Exists(int {_GetTableName()}ID)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    bool exists = false;");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = \"SELECT found=1 FROM {_GetTableName()} WHERE {_GetTableName()}ID = @{_GetTableName()}ID\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{_GetTableName()}ID\", {_GetTableName()}ID);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        int count = (int)command.ExecuteScalar();");
+            _tempText.AppendLine("        exists = count > 0;");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return exists;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGetAllMethod()
+        {
+            _tempText.AppendLine($"public static DataTable GetAll{_GetTableName()}()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    DataTable dt = new DataTable();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = \"SELECT * FROM {_GetTableName()}_view\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        SqlDataReader reader = command.ExecuteReader();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        if (reader.HasRows)");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine("            dt.Load(reader);");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        reader.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return dt;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGetInfoMethodForUsername()
+        {
+            _tempText.AppendLine($"public static DataTable GetInfo{_GetTableName()}ForUsername(string username)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    DataTable dt = new DataTable();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = \"SELECT * FROM {_GetTableName()}_view WHERE Username = @Username\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    command.Parameters.AddWithValue(\"@Username\", username);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        SqlDataReader reader = command.ExecuteReader();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        if (reader.HasRows)");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine("            dt.Load(reader);");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        reader.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return dt;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGetInfoMethodForUsernameAndPassword()
+        {
+            _tempText.AppendLine($"public static DataTable GetInfo{_GetTableName()}ForUsernameAndPassword(string username, string password)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    DataTable dt = new DataTable();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = \"SELECT * FROM {_GetTableName()}_view WHERE Username = @Username AND Password = @Password\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    command.Parameters.AddWithValue(\"@Username\", username);");
+            _tempText.AppendLine("    command.Parameters.AddWithValue(\"@Password\", password);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        SqlDataReader reader = command.ExecuteReader();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        if (reader.HasRows)");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine("            dt.Load(reader);");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        reader.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return dt;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateExistsMethodForUsername()
+        {
+            _tempText.AppendLine($"public static bool Exists{_GetTableName()}ForUsername(string username)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    bool exists = false;");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = \"SELECT Found=1 FROM {_GetTableName()}_view WHERE Username = @Username\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    command.Parameters.AddWithValue(\"@Username\", username);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        int count = (int)command.ExecuteScalar();");
+            _tempText.AppendLine("        exists = count > 0;");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return exists;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateExistsMethodForUsernameAndPassword()
+        {
+            _tempText.AppendLine($"public static bool Exists{_GetTableName()}ForUsernameAndPassword(string username, string password)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    bool exists = false;");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = \"SELECT Found=1 FROM {_GetTableName()}_view WHERE Username = @Username AND Password = @Password\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    command.Parameters.AddWithValue(\"@Username\", username);");
+            _tempText.AppendLine("    command.Parameters.AddWithValue(\"@Password\", password);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        int count = (int)command.ExecuteScalar();");
+            _tempText.AppendLine("        exists = count > 0;");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return exists;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateDataLayerAsLoginInfo()
         {
            _GenerateGetInfoMethodByID();
-        //_CreateGetInfoMethodForUsername();
-        //_CreateGetInfoMethodForUsernameAndPassword();
-        //_CreateAddMethod();
-        //_CreateUpdateMethod();
-        //_CreateDeleteMethod();
-        //_CreateExistsMethod();
-        //_CreateExistsMethodForUsername();
-        //_CreateExistsMethodForUsernameAndPassword();
-        //_CreateAllMethod();
+            _GenerateAddMethod();
+            _GenerateUpdateMethod();
+            _GenerateDeleteMethod();
+            _GenerateGetAllMethod();
+            _GenerateExistsMethod();
+            _GenerateGetInfoMethodForUsername();
+           _GenerateGetInfoMethodForUsernameAndPassword();       
+            _GenerateExistsMethodForUsername();
+            _GenerateExistsMethodForUsernameAndPassword();
+          
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateDataLayerAsNorumal()
+        {
+            _GenerateGetInfoMethodByID();
+            _GenerateAddMethod();
+            _GenerateUpdateMethod();
+            _GenerateDeleteMethod();
+            _GenerateGetAllMethod();
+            _GenerateExistsMethod();
+            //_GenerateGetInfoMethodForUsername();
+            //_GenerateGetInfoMethodForUsernameAndPassword();
+            //_GenerateExistsMethodForUsername();
+            //_GenerateExistsMethodForUsernameAndPassword();
+
 
             return _tempText.ToString();
         }
 
         public static string GenerateDataLayer(List<List<clsColumnInfoForDataAccess>> columnsInfo, string dbName)
         {
-            // Initialize StringBuilder and other variables
-            _tempText = new StringBuilder();
+           _tempText=new StringBuilder();
             _dbName = dbName;
             _columnsInfo = columnsInfo;
             _tableSingleName = _GetTableName();
 
-            // Append using directives
-            _tempText.AppendLine("using System;");
-            _tempText.AppendLine("using System.Data;");
-            _tempText.AppendLine("using System.Data.SqlClient;\r\n");
+            _tempText.AppendLine($"using System;\r\n" +
+               $"using System.Data;\r\nusing " +
+               $"System.Data.SqlClient;\r\n\r\nnamespace {_dbName}DataAccess\r\n{{");
 
-            // Check if dbName is valid for namespace declaration
-           
-                // Append namespace declaration
-                _tempText.AppendLine($"namespace {_dbName}DataAccessLayer");
-                _tempText.AppendLine("{");
-            
-
-            _tempText.AppendLine($"    public class cls{_tableSingleName}Data");
-            _tempText.AppendLine("    {");
+            _tempText.Append($"public class cls{_tableSingleName}Data");
+            _tempText.AppendLine();
+            _tempText.AppendLine("{");
 
             // Check for additional conditions
             if (!_isGenerateAllMode)
@@ -209,8 +660,16 @@ namespace CodeGenDataLayer
                 _isLogin = _DoesTableHaveUsernameAndPassword();
             }
 
-            // Call method to generate GetInfo method
-            _GenerateGetInfoMethodByID();
+
+            if (_isLogin)
+            {
+                _GenerateDataLayerAsLoginInfo();
+            }
+            else
+                _GenerateDataLayerAsNorumal();
+
+
+
 
             // Close class and namespace declarations if applicable
             _tempText.AppendLine("    }");
@@ -222,8 +681,6 @@ namespace CodeGenDataLayer
             // Return generated code as string
             return _tempText.ToString();
         }
-
-
 
         public static DataTable GetAllDatabaseNames()
         {
