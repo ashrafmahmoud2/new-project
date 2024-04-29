@@ -19,17 +19,21 @@ namespace CodeGenDataLayer
 {
     public class clsSQLDate
     {
-        private static string _tableName;
-        private static string _dbName;
-        private static  string _tableSingleName;
-        private static bool _isLogin;
-        private static  bool _isGenerateAllMode;
-        public static StringBuilder _tempText;
-         private static  StringBuilder _parametersBuilder ;
-        private static List<List<clsColumnInfoForDataAccess>> _columnsInfo;
-        
 
-        
+        private static bool _isLogin;
+        private static string _dbName;
+        private static string _tableName;
+        private static string _tableSingleName;
+        private static bool _isGenerateAllMode;
+        private static StringBuilder _tempText;
+        private static StringBuilder _parametersBuilder;
+        private static List<List<clsColumnInfoForDataAccess>> _columnsInfo;
+
+
+        //command.CommandType = CommandType.StoredProcedure;").AppendLine();
+        //reveine helper,
+
+
 
         public clsSQLDate()
         {
@@ -116,17 +120,17 @@ namespace CodeGenDataLayer
 
         private static string _GetParametersExecuteReader()
         {
-            _parametersBuilder= new StringBuilder();
+            _parametersBuilder = new StringBuilder();
             foreach (var columnList in _columnsInfo)
             {
-               
+
                 foreach (var columnInfo in columnList)
                 {
                     // Skip the first column
 
                     _parametersBuilder.Append($"{columnInfo.ColumnName} = " +
                            $"({columnInfo.DataType})reader[\"{columnInfo.ColumnName}\"]; \n");
-                    
+
                 }
             }
 
@@ -146,14 +150,14 @@ namespace CodeGenDataLayer
             {
                 foreach (var columnInfo in columnList)
                 {
-                    _parametersBuilder.Append($"command.Parameters.AddWithValue(\"@{columnInfo.ColumnName}\", {columnInfo.ColumnName});\n");
+                    _parametersBuilder.Append($"command.Parameters.AddWithValue(\"@{columnInfo.ColumnName}\", " +
+                        $"{columnInfo.ColumnName} ?? DBNull.Value);\n");
                 }
             }
 
             return _parametersBuilder.ToString();
         }
 
-    
         private static string _GetQueryOfInsert()
         {
             string columnNames = "";
@@ -203,6 +207,85 @@ namespace CodeGenDataLayer
         }
 
 
+
+
+        //_Generate Methods & DataLayer
+        public static string GenerateDataLayer(List<List<clsColumnInfoForDataAccess>> columnsInfo, string dbName)
+        {
+            _tempText = new StringBuilder();
+            _dbName = dbName;
+            _columnsInfo = columnsInfo;
+            _tableSingleName = _GetTableName();
+
+            _tempText.AppendLine($"using System;\r\n" +
+               $"using System.Data;\r\nusing " +
+               $"System.Data.SqlClient;\r\n\r\nnamespace {_dbName}DataAccess\r\n{{");
+
+            _tempText.Append($"public class cls{_tableSingleName}Data");
+            _tempText.AppendLine();
+            _tempText.AppendLine("{");
+
+            // Check for additional conditions
+            if (!_isGenerateAllMode)
+            {
+                _isLogin = _DoesTableHaveUsernameAndPassword();
+            }
+
+
+            if (_isLogin)
+            {
+                _GenerateDataLayerAsLoginInfo();
+            }
+            else
+                _GenerateDataLayerAsNorumal();
+
+
+
+
+            // Close class and namespace declarations if applicable
+            _tempText.AppendLine("    }");
+            if (!string.IsNullOrEmpty(_dbName))
+            {
+                _tempText.AppendLine("}");
+            }
+
+            // Return generated code as string
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateDataLayerAsLoginInfo()
+        {
+            _GenerateGetInfoMethodByID();
+            _GenerateAddMethod();
+            _GenerateUpdateMethod();
+            _GenerateDeleteMethod();
+            _GenerateGetAllMethod();
+            _GenerateExistsMethod();
+            _GenerateGetInfoMethodForUsername();
+            _GenerateGetInfoMethodForUsernameAndPassword();
+            _GenerateExistsMethodForUsername();
+            _GenerateExistsMethodForUsernameAndPassword();
+
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateDataLayerAsNorumal()
+        {
+            _GenerateGetInfoMethodByID();
+            _GenerateAddMethod();
+            _GenerateUpdateMethod();
+            _GenerateDeleteMethod();
+            _GenerateGetAllMethod();
+            _GenerateExistsMethod();
+            //_GenerateGetInfoMethodForUsername();
+            //_GenerateGetInfoMethodForUsernameAndPassword();
+            //_GenerateExistsMethodForUsername();
+            //_GenerateExistsMethodForUsernameAndPassword();
+
+
+            return _tempText.ToString();
+        }
 
         private static string _GenerateGetInfoMethodByID()
         {
@@ -300,38 +383,38 @@ namespace CodeGenDataLayer
 
         private static string _GenerateUpdateMethod()
         {
-            
-                _tempText.AppendLine($"public static bool Update{_GetTableName()}( {_GetParametersByTableColumns()})");
-                _tempText.AppendLine("{");
-                _tempText.AppendLine("    int RowAffected = 0;");
-                _tempText.AppendLine("");
-                _tempText.AppendLine($"    {_GetConnectionString()};");
-                _tempText.AppendLine("");
-                _tempText.AppendLine($"    string query = \"{_GetQueryOfUpdate()}\";");
-                _tempText.AppendLine("");
-                _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
-                _tempText.AppendLine("");
-                _tempText.AppendLine($"    {_GetAddWithValueParameters()};");
-                _tempText.AppendLine("");
-                _tempText.AppendLine("    try");
-                _tempText.AppendLine("    {");
-                _tempText.AppendLine("        connection.Open();");
-                _tempText.AppendLine("");
-                _tempText.AppendLine("        RowAffected = command.ExecuteNonQuery();");
-                _tempText.AppendLine("    }");
-                _tempText.AppendLine("    catch (Exception ex)");
-                _tempText.AppendLine("    {");
-                _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
-                _tempText.AppendLine("    }");
-                _tempText.AppendLine("    finally");
-                _tempText.AppendLine("    {");
-                _tempText.AppendLine("        connection.Close();");
-                _tempText.AppendLine("    }");
-                _tempText.AppendLine("");
-                _tempText.AppendLine("    return (RowAffected > 0);");
-                _tempText.AppendLine("}");
-                return _tempText.ToString();
-            
+
+            _tempText.AppendLine($"public static bool Update{_GetTableName()}( {_GetParametersByTableColumns()})");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    int RowAffected = 0;");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetConnectionString()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    string query = \"{_GetQueryOfUpdate()}\";");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
+            _tempText.AppendLine("");
+            _tempText.AppendLine($"    {_GetAddWithValueParameters()};");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    try");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Open();");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("        RowAffected = command.ExecuteNonQuery();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    catch (Exception ex)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        Console.WriteLine($\"Error: {ex.Message}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    finally");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        connection.Close();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("");
+            _tempText.AppendLine("    return (RowAffected > 0);");
+            _tempText.AppendLine("}");
+            return _tempText.ToString();
+
 
             return _tempText.ToString();
         }
@@ -605,52 +688,23 @@ namespace CodeGenDataLayer
             return _tempText.ToString();
         }
 
-        private static string _GenerateDataLayerAsLoginInfo()
+
+
+
+
+        //_Generate Methods & BusinessLayer
+        public static string GenerateBusinessLayer(List<List<clsColumnInfoForDataAccess>> columnsInfo, string dbName)
         {
-           _GenerateGetInfoMethodByID();
-            _GenerateAddMethod();
-            _GenerateUpdateMethod();
-            _GenerateDeleteMethod();
-            _GenerateGetAllMethod();
-            _GenerateExistsMethod();
-            _GenerateGetInfoMethodForUsername();
-           _GenerateGetInfoMethodForUsernameAndPassword();       
-            _GenerateExistsMethodForUsername();
-            _GenerateExistsMethodForUsernameAndPassword();
-          
-
-            return _tempText.ToString();
-        }
-
-        private static string _GenerateDataLayerAsNorumal()
-        {
-            _GenerateGetInfoMethodByID();
-            _GenerateAddMethod();
-            _GenerateUpdateMethod();
-            _GenerateDeleteMethod();
-            _GenerateGetAllMethod();
-            _GenerateExistsMethod();
-            //_GenerateGetInfoMethodForUsername();
-            //_GenerateGetInfoMethodForUsernameAndPassword();
-            //_GenerateExistsMethodForUsername();
-            //_GenerateExistsMethodForUsernameAndPassword();
-
-
-            return _tempText.ToString();
-        }
-
-        public static string GenerateDataLayer(List<List<clsColumnInfoForDataAccess>> columnsInfo, string dbName)
-        {
-           _tempText=new StringBuilder();
+            _tempText = new StringBuilder();
             _dbName = dbName;
             _columnsInfo = columnsInfo;
             _tableSingleName = _GetTableName();
 
             _tempText.AppendLine($"using System;\r\n" +
                $"using System.Data;\r\nusing " +
-               $"System.Data.SqlClient;\r\n\r\nnamespace {_dbName}DataAccess\r\n{{");
+               $"System.Data.SqlClient;\r\n\r\nnamespace {_dbName}BusinessLayer\r\n{{");
 
-            _tempText.Append($"public class cls{_tableSingleName}Data");
+            _tempText.Append($"public class cls{_tableSingleName}");
             _tempText.AppendLine();
             _tempText.AppendLine("{");
 
@@ -660,19 +714,17 @@ namespace CodeGenDataLayer
                 _isLogin = _DoesTableHaveUsernameAndPassword();
             }
 
-
             if (_isLogin)
             {
-                _GenerateDataLayerAsLoginInfo();
+                _GenerateBusinessLayerAsLoginInfo();
             }
             else
-                _GenerateDataLayerAsNorumal();
-
-
-
+            {
+                _GenerateBusinessLayerAsNormal();
+            }
 
             // Close class and namespace declarations if applicable
-            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
             if (!string.IsNullOrEmpty(_dbName))
             {
                 _tempText.AppendLine("}");
@@ -682,6 +734,486 @@ namespace CodeGenDataLayer
             return _tempText.ToString();
         }
 
+        private static string _GenerateBusinessLayerAsLoginInfo()
+        {
+            _GenerateEnumMode();
+            _GenerateProperties();
+            _GenerateConstructor();
+           _GenerateAdd_Update_Save_MethodInBusinessLayer();
+           _GenerateDeleteMethodInBusinessLayer();
+            _GenerateGetAllMethodInBusinessLayer();
+            _GenerateFindMethodInBusinessLayer();
+            _GenerateGetInfoMethodForUsernameMethodInBusinessLayer();
+            _GenerateGetInfoMethodForUsernameAndPasswordMethodInBusinessLayer();
+            _GenerateExistsMethodForUsernameMethodInBusinessLayer();
+            _GenerateExistsMethodForUsernameAndPasswordInBusinessLayer();
+            _GenerateTestsFunctions();
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateBusinessLayerAsNormal()
+        {
+            _GenerateEnumMode();
+            _GenerateProperties();
+            _GenerateConstructor();
+            _GenerateAdd_Update_Save_MethodInBusinessLayer();
+            _GenerateDeleteMethodInBusinessLayer();
+            _GenerateGetAllMethodInBusinessLayer();
+            _GenerateFindMethodInBusinessLayer();
+            _GenerateTestsFunctions();
+            return _tempText.ToString();
+
+
+            return _tempText.ToString();
+        }
+
+        private static string _GetParmterForAddUpdateBusinesslayer(bool AddMode = true)
+        {
+            StringBuilder parameters = new StringBuilder();
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    parameters.AppendLine($"this.{columnInfo.ColumnName},");
+                   
+                }
+            
+            }
+            int lastIndex = parameters.ToString().LastIndexOf(',');
+            parameters.Remove(lastIndex, 1);
+            // If it's not Add mode, remove the first parameter
+            if (!AddMode)
+            {
+                int index = parameters.ToString().IndexOf(',');
+                parameters.Remove(0, index + 1);
+                //int lastIndex = parameters.ToString().LastIndexOf(',');
+                //parameters.Remove(lastIndex, 1);
+
+            }
+
+            return parameters.ToString();
+        }
+
+        private static string _GenerateEnumMode()
+        {
+            _tempText.AppendLine("public enum enMode { AddNew = 0, Update = 1 };");
+            _tempText.AppendLine("public enMode Mode { get; set; } = enMode.AddNew;");
+
+            return _tempText.ToString();
+        }
+
+        private static void _GenerateProperties()
+        {
+            // Generate properties based on column information
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    _tempText.AppendLine($"public {columnInfo.DataType} {columnInfo.ColumnName} {{ get; set; }}");
+                }
+            }
+        }
+
+        private static void _GenerateConstructor()
+        {
+            // Generate constructor
+            _tempText.AppendLine($"public cls{_tableSingleName}()");
+            _tempText.AppendLine("{");
+            // Initialize properties with default values
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    _tempText.AppendLine($"this.{columnInfo.ColumnName}" +
+                        $" = {GetDefaultValueForType(columnInfo.DataType)};");
+                }
+            }
+            _tempText.AppendLine("}");
+        }
+
+        private static string GetDefaultValueForType(string type)
+        {
+            // Return default value based on type
+            switch (type.ToLower())
+            {
+                case "string":
+                    return "\"\"";
+                case "int":
+                case "long":
+                case "double":
+                case "float":
+                    return "0";
+                case "datetime":
+                    return "DateTime.Now";
+                case "bool":
+                    return "false";
+                case "char":
+                 return "0";
+                default:
+                    return "null";
+            }
+        }
+
+        private static string _GenerateAdd_Update_Save_MethodInBusinessLayer()
+        {
+            
+            string addParameters = _GetParmterForAddUpdateBusinesslayer(true);
+            string updateParameters = _GetParmterForAddUpdateBusinesslayer(false);
+
+            _tempText.AppendLine($"public bool _AddNew{_GetTableName()}()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    this.{_GetTableName()}ID =" +
+                $" cls{_GetTableName()}Data.AddNew{_GetTableName()}({addParameters});");
+            _tempText.AppendLine($"    return (this.{_GetTableName()}ID != -1);");
+            _tempText.AppendLine("}");
+            _tempText.AppendLine();
+
+
+            _tempText.AppendLine($"private bool _Update{_GetTableName()}()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    return cls{_GetTableName()}Data.Update{_GetTableName()}({updateParameters});");
+            _tempText.AppendLine("}");
+            _tempText.AppendLine();
+
+
+            _tempText.AppendLine("public bool Save()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine("    switch (Mode)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        case enMode.AddNew:");
+            _tempText.AppendLine($"            if (_AddNew{_GetTableName()}())");
+            _tempText.AppendLine("            {");
+            _tempText.AppendLine("                Mode = enMode.Update;");
+            _tempText.AppendLine("                return true;");
+            _tempText.AppendLine("            }");
+            _tempText.AppendLine("            else");
+            _tempText.AppendLine("            {");
+            _tempText.AppendLine("                return false;");
+            _tempText.AppendLine("            }");
+            _tempText.AppendLine("        case enMode.Update:");
+            _tempText.AppendLine($"            return _Update{_GetTableName()}();");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    return false;");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateDeleteMethodInBusinessLayer()
+        {
+            _tempText.AppendLine($"public static bool Delete{_GetTableName()}(int {_GetTableName()}ID)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    return cls{_GetTableName()}Data.Delete{_GetTableName()}({_GetTableName()}ID);");
+            _tempText.AppendLine("}");
+            return _tempText.ToString();
+        }          
+
+        private static string _GenerateGetAllMethodInBusinessLayer()
+        {
+            _tempText.AppendLine($"public static DataTable GetAll{_GetTableName()}()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    return cls{_GetTableName()}Data.GetAll{_GetTableName()}();");
+            _tempText.AppendLine("}");
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateExistsMethodForUsernameMethodInBusinessLayer()
+        {
+            _tempText.AppendLine($"public static bool Does{_GetTableName()}Exist(string Username)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    return cls{_GetTableName()}Data.Does{_GetTableName()}Exist(Username);");
+            _tempText.AppendLine("}");
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateExistsMethodForUsernameAndPasswordInBusinessLayer()
+        {
+            _tempText.AppendLine($"public static bool Does{_GetTableName()}Exist(string Username, string Password)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    return cls{_GetTableName()}Data.Does{_GetTableName()}Exist(Username, Password);");
+            _tempText.AppendLine("}");
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateFindMethodInBusinessLayer()
+        {
+            StringBuilder m = new StringBuilder();
+
+            // Generate property assignments
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    m.AppendLine($"  {(columnInfo.DataType)} {columnInfo.ColumnName} = {GetDefaultValueForType((columnInfo.DataType))};");
+                }
+            }
+
+            StringBuilder m2 = new StringBuilder();
+
+            // Generate parameter list with 'ref' keyword only for the first parameter
+            bool isFirst = true;
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    if (isFirst)
+                    {
+                        m2.AppendLine($"ref {columnInfo.ColumnName},");
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        m2.AppendLine($"{columnInfo.ColumnName},");
+                    }
+                }
+               
+            }
+            int lastIndex = m2.ToString().LastIndexOf(',');
+            m2.Remove(lastIndex, 1);
+
+
+
+            // Generate method signature
+            _tempText.AppendLine($"public static cls{_GetTableName()} Find(int {_GetTableName()}ID)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine(m.ToString()); // Append property assignments
+            _tempText.AppendLine();
+
+            _tempText.AppendLine($"    bool IsFound = cls{_GetTableName()}Data.Get{_GetTableName()}InfoByID({m2.ToString()});");
+            _tempText.AppendLine();
+            _tempText.AppendLine("    if (IsFound)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        return new cls{_GetTableName()}( {m2.ToString()});");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        return null;");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGetInfoMethodForUsernameMethodInBusinessLayer()
+        {
+            StringBuilder m = new StringBuilder();
+
+            // Generate property assignments
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    m.AppendLine($"this.{columnInfo.ColumnName} = {GetDefaultValueForType(columnInfo.DataType)};");
+                }
+            }
+
+            StringBuilder parameters = new StringBuilder();
+            bool isFirst = true;
+
+            // Generate parameter list with 'ref' keyword only for the first parameter
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    if (isFirst)
+                    {
+                        parameters.AppendLine($"ref {columnInfo.ColumnName},");
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        parameters.AppendLine($"{columnInfo.ColumnName},");
+                    }
+                }
+            }
+
+            _tempText.AppendLine($"public static cls{_GetTableName()} FindByUsername(string UserName)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"   {m.ToString()};");
+            //_tempText.AppendLine("    string Password = \"\";");
+            //_tempText.AppendLine("    bool IsActive = false;");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    bool IsFound = cls{_GetTableName()}Data.GetUserInfoByUserName");
+            _tempText.AppendLine($"        ({parameters.ToString()});");
+            _tempText.AppendLine();
+            _tempText.AppendLine("    if (IsFound)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        return new cls{_GetTableName()}({parameters.ToString()});");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        return null;");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGetInfoMethodForUsernameAndPasswordMethodInBusinessLayer()
+        {
+            StringBuilder m = new StringBuilder();
+
+            // Generate property assignments
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    m.AppendLine($"this.{columnInfo.ColumnName} = {GetDefaultValueForType(columnInfo.DataType)};");
+                }
+            }
+
+            StringBuilder parameters = new StringBuilder();
+            bool isFirst = true;
+
+            // Generate parameter list with 'ref' keyword only for the first parameter
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    if (isFirst)
+                    {
+                        parameters.AppendLine($"ref {columnInfo.ColumnName},");
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        parameters.AppendLine($"{columnInfo.ColumnName},");
+                    }
+                }
+            }
+            _tempText.AppendLine($"public static cls{_GetTableName()} FindByUsernameAndPassword(string UserName, string Password)");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"   {m.ToString()};");
+            //_tempText.AppendLine("    int userID = -1, personID = -1;");
+            //_tempText.AppendLine("    bool IsActive = false;");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    bool IsFound = cls{_GetTableName()}.Get{_GetTableName()}InfoByUserNameAndPassword");
+            _tempText.AppendLine($"        ({parameters.ToString()});");
+            _tempText.AppendLine();
+            _tempText.AppendLine("    if (IsFound)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        return new cls{_GetTableName()}({parameters.ToString()});");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine("        return null;");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateTestsFunctions()
+        {
+            _tableName = _GetTableName();
+            StringBuilder initializationCode = new StringBuilder();
+
+            // Generate object creation line
+            initializationCode.AppendLine($"cls{_GetTableName()} {_GetTableName().ToLower()} = new cls{_GetTableName()}();");
+
+            // Generate property assignments
+
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    initializationCode.AppendLine($"{_GetTableName().ToLower()}.{columnInfo.ColumnName} = {GetDefaultValueForType(columnInfo.DataType)};");
+                }
+            }
+
+          
+
+
+            // Test methods...
+
+            // TestAdd method
+            _tempText.AppendLine($"static void TestAdd{_tableName}()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"{initializationCode.ToString()};");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    if ({_GetTableName().ToLower()}.Save())");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"{_tableName} added successfully!\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"Failed to add {_tableName}.\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+
+            // Append all test methods
+            StringBuilder all_tempText = new StringBuilder();
+            all_tempText.AppendLine("// Test methods...");
+            all_tempText.Append(_tempText.ToString());
+
+
+
+            _tempText.AppendLine($"static void TestFind{_GetTableName()}()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    int {_GetTableName()}IdToFind = 27; // Replace with the actual {_GetTableName()} ID to find");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    cls{_GetTableName()} found{_GetTableName()} = cls{_GetTableName()}.Find({_GetTableName()}IdToFind);");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    if (found{_GetTableName()} != null)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine($\"Found {_GetTableName()}: {_GetTableName()}ID={{found{_GetTableName()}.{_GetTableName()}ID}}, Notes={{found{_GetTableName()}.Notes}}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"{_GetTableName()} not found.\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+
+
+
+            _tempText.AppendLine($"static void TestUpdate{_GetTableName()}s()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    int {_GetTableName()}IdToUpdate = 27; // Replace with the actual {_GetTableName()} ID to update");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    cls{_GetTableName()} {_GetTableName()} = cls{_GetTableName()}.Find({_GetTableName()}IdToUpdate);");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    if ({_GetTableName()} != null)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine($\"Current Notes: {_GetTableName()}.Notes}}\");");
+            _tempText.AppendLine();
+            _tempText.AppendLine("        // Modify the properties");
+            _tempText.AppendLine($"        {_GetTableName()}.Notes = \"Updated {_GetTableName()}\";");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"        if ({_GetTableName()}.Save())");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine($"            Console.WriteLine(\"{_GetTableName()} updated successfully!\");");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("        else");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine($"            Console.WriteLine(\"Failed to update {_GetTableName()}.\");");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"{_GetTableName()} not found.\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+
+
+
+            _tempText.AppendLine($"static void TestDelete{_GetTableName()}s()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    int {_GetTableName()}IdToDelete = 36; // Replace with the actual {_GetTableName()} ID to delete");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    if (cls{_GetTableName()}.Delete{_GetTableName()}({_GetTableName()}IdToDelete))");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"{_GetTableName()} deleted successfully!\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"Failed to delete {_GetTableName()}.\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+
+
+
+        //generel functions
         public static DataTable GetAllDatabaseNames()
         {
             DataTable databaseNames = new DataTable();

@@ -1,6 +1,6 @@
 ﻿namespace MyCodeGenerator
 {
-    partial class Form1
+    partial class frmCodeGenUI
     {
         /// <summary>
         /// Required designer variable.
@@ -397,6 +397,7 @@
             this.btnGenerateBusinessLayer.Size = new System.Drawing.Size(304, 45);
             this.btnGenerateBusinessLayer.TabIndex = 34;
             this.btnGenerateBusinessLayer.Text = "Generate Business Layer";
+            this.btnGenerateBusinessLayer.Click += new System.EventHandler(this.btnGenerateBusinessLayer_Click);
             // 
             // lblNumberOfColumnsRecords
             // 
@@ -883,7 +884,7 @@
             this.guna2Elipse1.BorderRadius = 30;
             this.guna2Elipse1.TargetControl = this;
             // 
-            // Form1
+            // frmCodeGenUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -891,7 +892,7 @@
             this.ClientSize = new System.Drawing.Size(1297, 767);
             this.Controls.Add(this.guna2CustomGradientPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "Form1";
+            this.Name = "frmCodeGenUI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             this.guna2CustomGradientPanel1.ResumeLayout(false);
