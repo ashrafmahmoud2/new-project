@@ -76,18 +76,18 @@ namespace MyCodeGenerator
                 DataTable data = clsSQL.GetTableInfo(tableName, dbName);
                 DGVTableInfo.DataSource = data;
 
-                listviewColumnsInfo.Columns.Clear();
+                //listviewColumnsInfo.Columns.Clear();
 
                 foreach (DataColumn column in data.Columns)
                 {
-                    listviewColumnsInfo.Columns.Add(column.ColumnName);
+                   // listviewColumnsInfo.Columns.Add(column.ColumnName);
                 }
 
-                listviewColumnsInfo.Items.Clear();
+               // listviewColumnsInfo.Items.Clear();
                 foreach (DataRow row in data.Rows)
                 {
                     ListViewItem item = new ListViewItem(row.ItemArray.Select(x => x.ToString()).ToArray());
-                    listviewColumnsInfo.Items.Add(item);
+                   // listviewColumnsInfo.Items.Add(item);
                 }
 
                 lblNumberOfColumnsRecords.Text = data.Rows.Count.ToString();
@@ -100,39 +100,39 @@ namespace MyCodeGenerator
             {
                 txtGenText.Clear();
                 _tableName = DGVTablesName.SelectedRows[0].Cells[0].Value.ToString();
-                _FillColumnInfoForDataAccessObjectFromListView();
+              //  _FillColumnInfoForDataAccessObjectFromListView();
             }
         }
 
-        private void _FillColumnInfoForDataAccessObjectFromListView()
-        {
-            _columnsInfoForDataAccess.Clear();
+        //private void _FillColumnInfoForDataAccessObjectFromListView()
+        //{
+        //    _columnsInfoForDataAccess.Clear();
 
-            for (int i = 0; i < listviewColumnsInfo.Items.Count; i++)
-            {
-                ListViewItem firstItem = listviewColumnsInfo.Items[i];
+        //    for (int i = 0; i < listviewColumnsInfo.Items.Count; i++)
+        //    {
+        //        ListViewItem firstItem = listviewColumnsInfo.Items[i];
 
-                if (firstItem.SubItems.Count > 0)
-                {
-                    var columnInfo = new List<clsColumnInfoForDataAccess>
-                    {
-                        new clsColumnInfoForDataAccess
-                        {
-                            ColumnName = firstItem.SubItems[0].Text,
-                            DataType = firstItem.SubItems[1].Text,
-                            IsNullable = firstItem.SubItems[2].Text.ToLower() == "yes"
-                        }
-                    };
+        //        if (firstItem.SubItems.Count > 0)
+        //        {
+        //            var columnInfo = new List<clsColumnInfoForDataAccess>
+        //            {
+        //                new clsColumnInfoForDataAccess
+        //                {
+        //                    ColumnName = firstItem.SubItems[0].Text,
+        //                    DataType = firstItem.SubItems[1].Text,
+        //                    IsNullable = firstItem.SubItems[2].Text.ToLower() == "yes"
+        //                }
+        //            };
 
-                    _columnsInfoForDataAccess.Add(columnInfo);
-                }
-            }
-        }
+        //            _columnsInfoForDataAccess.Add(columnInfo);
+        //        }
+        //    }
+        //}
 
         private void _Reset()
         {
             comboDatabaseName.SelectedIndex = -1;
-            listviewColumnsInfo.Items.Clear();
+           // listviewColumnsInfo.Items.Clear();
             DGVTablesName.DataSource = null;
             txtGenText.Clear();
             lblNumberOfColumnsRecords.Text = "0";
@@ -229,6 +229,10 @@ namespace MyCodeGenerator
                 txtGenText.Text =
                  clsSQL.
                     GenerateBusinessLayer(comboDatabaseName.Text, _columnsInfoForDataAccess);
+
+                guna2TextBox1.Text =
+               clsSQL.
+                  GenerateBusinessLayer(comboDatabaseName.Text, _columnsInfoForDataAccess);
             }
         }
     }

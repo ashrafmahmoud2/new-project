@@ -30,9 +30,7 @@ namespace CodeGenDataLayer
         private static List<List<clsColumnInfoForDataAccess>> _columnsInfo;
 
 
-        //command.CommandType = CommandType.StoredProcedure;").AppendLine();
-        //reveine helper,
-
+      
 
 
         public clsSQLDate()
@@ -784,10 +782,11 @@ namespace CodeGenDataLayer
             // If it's not Add mode, remove the first parameter
             if (!AddMode)
             {
-                int index = parameters.ToString().IndexOf(',');
-                parameters.Remove(0, index + 1);
-                //int lastIndex = parameters.ToString().LastIndexOf(',');
-                //parameters.Remove(lastIndex, 1);
+                int startIndex = parameters.ToString().IndexOf("ref");
+                if (startIndex != -1)
+                {
+                    parameters.Remove(startIndex, 3); // Removing "ref" and the following space
+                }
 
             }
 
@@ -816,6 +815,20 @@ namespace CodeGenDataLayer
 
         private static void _GenerateConstructor()
         {
+            StringBuilder parameters = new StringBuilder();
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    parameters.Append($"{columnInfo.DataType} {columnInfo.ColumnName},");
+
+                }
+
+            }
+            int lastIndex = parameters.ToString().LastIndexOf(',');
+            parameters.Remove(lastIndex, 1);
+
+
             // Generate constructor
             _tempText.AppendLine($"public cls{_tableSingleName}()");
             _tempText.AppendLine("{");
@@ -824,10 +837,25 @@ namespace CodeGenDataLayer
             {
                 foreach (var columnInfo in columnList)
                 {
-                    _tempText.AppendLine($"this.{columnInfo.ColumnName}" +
-                        $" = {GetDefaultValueForType(columnInfo.DataType)};");
+                    _tempText.AppendLine($"this.{columnInfo.ColumnName}" +$" = {GetDefaultValueForType(columnInfo.DataType)};");
                 }
             }
+            _tempText.AppendLine("  this.Mode = enMode.AddNew;");
+            _tempText.AppendLine("}");
+
+
+
+            _tempText.AppendLine($"private  cls{_tableSingleName}({parameters.ToString()})");
+            _tempText.AppendLine("{");
+            // Initialize properties with default values
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    _tempText.AppendLine($"this.{columnInfo.ColumnName}={columnInfo.ColumnName};");
+                }
+            }
+            _tempText.AppendLine("  this.Mode = enMode.Update;");
             _tempText.AppendLine("}");
         }
 
@@ -951,31 +979,34 @@ namespace CodeGenDataLayer
             StringBuilder m2 = new StringBuilder();
 
             // Generate parameter list with 'ref' keyword only for the first parameter
-            bool isFirst = true;
+            bool Addref = true;
             foreach (var columnList in _columnsInfo)
             {
                 foreach (var columnInfo in columnList)
                 {
-                    if (isFirst)
+                    if (Addref)
                     {
                         m2.AppendLine($"ref {columnInfo.ColumnName},");
-                        isFirst = false;
+                       // Addref = false;
                     }
                     else
                     {
-                        m2.AppendLine($"{columnInfo.ColumnName},");
+                        m2.AppendLine($" {columnInfo.ColumnName},");
                     }
                 }
-               
             }
+
+            // Remove the last comma if it exists
             int lastIndex = m2.ToString().LastIndexOf(',');
-            m2.Remove(lastIndex, 1);
-
-
+            if (lastIndex != -1)
+            {
+                m2.Remove(lastIndex, 1);
+            }
 
             // Generate method signature
             _tempText.AppendLine($"public static cls{_GetTableName()} Find(int {_GetTableName()}ID)");
             _tempText.AppendLine("{");
+            Addref =true ;
             _tempText.AppendLine(m.ToString()); // Append property assignments
             _tempText.AppendLine();
 
@@ -983,6 +1014,7 @@ namespace CodeGenDataLayer
             _tempText.AppendLine();
             _tempText.AppendLine("    if (IsFound)");
             _tempText.AppendLine("    {");
+            Addref = true;
             _tempText.AppendLine($"        return new cls{_GetTableName()}( {m2.ToString()});");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("    else");
@@ -1118,10 +1150,19 @@ namespace CodeGenDataLayer
                 }
             }
 
-          
+
 
 
             // Test methods...
+
+            _tempText.AppendLine("//static void Main(string[] args)");
+            _tempText.AppendLine("//{");
+            _tempText.AppendLine(" //   TestAddLicenses();");
+            _tempText.AppendLine(" //   TestFindLicenses();");
+            _tempText.AppendLine(" //   TestUpdateLicenses();");
+            _tempText.AppendLine(" //   TestDeleteLicenses();");
+            _tempText.AppendLine(" //   Console.ReadLine();");
+            _tempText.AppendLine("//}");
 
             // TestAdd method
             _tempText.AppendLine($"static void TestAdd{_tableName}()");
