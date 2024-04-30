@@ -230,9 +230,40 @@ namespace MyCodeGenerator
                  clsSQL.
                     GenerateBusinessLayer(comboDatabaseName.Text, _columnsInfoForDataAccess);
 
-                guna2TextBox1.Text =
-               clsSQL.
-                  GenerateBusinessLayer(comboDatabaseName.Text, _columnsInfoForDataAccess);
+               // guna2TextBox1.Text =
+               //clsSQL.
+               //   GenerateBusinessLayer(comboDatabaseName.Text, _columnsInfoForDataAccess);
+            }
+        }
+
+        private void btnGenerateStoredProcedure_Click(object sender, EventArgs e)
+        {
+
+            if (int.Parse(lblNumberOfColumnsRecords.Text) <= 0)
+            {
+                MessageBox.Show("You have to select a column at least!", "Miss Data",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                //to test;
+                //String FirstValue = _columnsInfoForDataAccess[0][0].ColumnName;
+                //MessageBox.Show("the Tabel Name =" + FirstValue.Remove(FirstValue.Length - 2));
+
+                //to get test ;
+                List<List<clsColumnInfoForDataAccess>> _columnsInfoForDataAccess = new List<List<clsColumnInfoForDataAccess>>();
+                for (int i = 1; i <= 6; i++)
+                {
+                    List<clsColumnInfoForDataAccess> columnInfoList = new List<clsColumnInfoForDataAccess>();
+                    columnInfoList.Add(new clsColumnInfoForDataAccess { ColumnName = $"Column{i}", DataType = $"int", IsNullable = i % 2 == 0 });
+                    _columnsInfoForDataAccess.Add(columnInfoList);
+                }
+
+
+                txtGenText.Text =
+                 clsSQL.
+                    GenerateStoredProcedure(comboDatabaseName.Text, _columnsInfoForDataAccess);
+
             }
         }
     }

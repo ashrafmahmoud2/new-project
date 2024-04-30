@@ -29,8 +29,13 @@ namespace CodeGenDataLayer
         private static StringBuilder _parametersBuilder;
         private static List<List<clsColumnInfoForDataAccess>> _columnsInfo;
 
+        //Ask
+        //why you don't add table name in stored prosucers;
 
-      
+
+        //there are some fun in khaled abouts files  
+        //take a copy of dvld db in git hup
+
 
 
         public clsSQLDate()
@@ -1250,6 +1255,397 @@ namespace CodeGenDataLayer
 
             return _tempText.ToString();
         }
+
+
+
+
+        //Generate Stored Procedure
+        public static string GenerateGenerateStoredProcedure(List<List<clsColumnInfoForDataAccess>> columnsInfo, string dbName)
+        {
+            _tempText = new StringBuilder();
+            _dbName = dbName;
+            _columnsInfo = columnsInfo;
+            _tableSingleName = _GetTableName();
+
+            if (!_isGenerateAllMode)
+            {
+                _isLogin = _DoesTableHaveUsernameAndPassword();
+            }
+
+            if (_isLogin)
+            {
+                _GenerateGenerateStoredProcedureAsLoginInfo();
+            }
+            else
+            {
+                _GenerateGenerateStoredProcedureAsNormal();
+            }
+
+        
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGenerateStoredProcedureAsLoginInfo()
+        {
+
+            _GenerateAddMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+
+            _GenerateUpdateMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+
+            _GenerateDeleteMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateGetAllMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateFindMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateGetInfoMethodForUsernameMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateGetInfoMethodForUsernameAndPasswordMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateExistsMethodForUsernameMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateExistsMethodForUsernameAndPasswordInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateTestsFunctionsInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGenerateStoredProcedureAsNormal()
+        {
+            _GenerateAddMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+
+            _GenerateUpdateMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+
+            _GenerateDeleteMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateGetAllMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+            _GenerateFindMethodInGenerateStoredProcedure();
+            _tempText.AppendLine("----------------------\n ----------------------");
+
+
+
+
+
+            return _tempText.ToString();
+        }
+
+        private static string _GetParmterForGenerateStoredProcedure(bool addAtSign = true, bool updateParameter = false, bool withDataType = false)
+        {
+            StringBuilder parameters = new StringBuilder();
+
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    if (!updateParameter)
+                    {
+                        if (addAtSign)
+                        {
+                            parameters.Append($"@{columnInfo.ColumnName}{(withDataType ? " " + columnInfo.DataType : "")},");
+                        }
+                        else
+                        {
+                            parameters.Append($"{columnInfo.ColumnName}{(withDataType ? " " + columnInfo.DataType : "")},");
+                        }
+                    }
+                    else
+                    {
+                        parameters.Append($"{columnInfo.ColumnName} = @{columnInfo.ColumnName},");
+                    }
+                }
+            }
+
+            int lastIndex = parameters.ToString().LastIndexOf(',');
+            parameters.Remove(lastIndex, 1);
+
+            return parameters.ToString();
+        }
+
+        private static string _GenerateAddMethodInGenerateStoredProcedure()
+        {
+          
+
+            _tempText.AppendLine($"create procedure SP_AddNew{_GetTableName()}");
+            _tempText.AppendLine($"{_GetParmterForGenerateStoredProcedure(true,false,true)}");
+                _tempText.AppendLine($", @New{_GetTableName()}ID int output");
+            _tempText.AppendLine($"as");
+            _tempText.AppendLine($"begin");
+            _tempText.AppendLine($"insert into {_GetTableName()} ({_GetParmterForGenerateStoredProcedure(false)})" +
+                $"\r\nvalues({_GetParmterForGenerateStoredProcedure()})" +
+                $"\r\nset @New{_GetTableName()}ID = scope_identity();");
+            _tempText.AppendLine($"end;");
+            _tempText.AppendLine($"go");
+            _tempText.AppendLine();      
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateUpdateMethodInGenerateStoredProcedure()
+        {
+
+
+            _tempText.AppendLine($"create procedure SP_Update{_GetTableName()}");
+            _tempText.AppendLine($"{_GetParmterForGenerateStoredProcedure(true, false, true)}");
+            _tempText.AppendLine($"as");
+            _tempText.AppendLine($"begin");
+            _tempText.AppendLine($"Update {_GetTableName()}");
+          
+            _tempText.AppendLine($"set {_GetParmterForGenerateStoredProcedure(true, true)}"); 
+            
+            _tempText.AppendLine($"end;");
+            _tempText.AppendLine($"go");
+            _tempText.AppendLine();
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateDeleteMethodInGenerateStoredProcedure()
+        {
+            
+            _tempText.AppendLine($"create procedure SP_Delete{_GetTableName()}");
+            _tempText.AppendLine($"@{_GetTableName()}ID  int");
+            _tempText.AppendLine($"as");
+            _tempText.AppendLine($"begin");
+            _tempText.AppendLine($"delete  from {_GetTableName()}   where {_GetTableName()}ID = @{_GetTableName()}ID");
+            _tempText.AppendLine($"end;");
+            _tempText.AppendLine($"go");
+            _tempText.AppendLine();
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateFindMethodInGenerateStoredProcedure()
+        {
+            _tempText.AppendLine($"create procedure SP_Get{_GetTableName()}InfoByID");
+            _tempText.AppendLine($"{_GetTableName()}ID  int");
+            _tempText.AppendLine($"as");
+            _tempText.AppendLine($"begin");
+            _tempText.AppendLine($"select * from  {_GetTableName()}  where {_GetTableName()}ID = @{_GetTableName()}ID");
+            _tempText.AppendLine($"end;");
+            _tempText.AppendLine($"go");
+            _tempText.AppendLine();
+
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGetAllMethodInGenerateStoredProcedure()
+        {
+            _tempText.AppendLine($"create procedure SP_GetAll{_GetTableName()}()");
+            _tempText.AppendLine("as");
+            _tempText.AppendLine("begin");
+            _tempText.AppendLine($"  select * from {_GetTableName()};");
+            _tempText.AppendLine("end;");
+            _tempText.AppendLine("go;");
+            return _tempText.ToString();
+        }
+
+        private static string _Generate_DoesExistMethodInGenerateStoredProcedure()
+        {
+            _tempText.AppendLine($"create procedure SP_Does{_GetTableName()}Exist");
+            _tempText.AppendLine("@{_GetTableName()} int ");
+            _tempText.AppendLine("as");
+            _tempText.AppendLine("begin");
+            _tempText.AppendLine($"  if exists(select top 1 found = 1 from  where {_GetTableName()}ID = @{_GetTableName()}ID);");
+            _tempText.AppendLine("return 1 ");
+            _tempText.AppendLine("else\r\n    return 0");
+            _tempText.AppendLine("end;");
+            _tempText.AppendLine("go;");
+            return _tempText.ToString();
+        }
+
+
+        private static string _GenerateExistsMethodForUsernameMethodInGenerateStoredProcedure()
+        {
+            _tempText.AppendLine($"SP_DoesUserExistByUsername");
+            _tempText.AppendLine("@Username nvarchar(20) ");
+            _tempText.AppendLine("as");
+            _tempText.AppendLine("begin");
+            _tempText.AppendLine($"if exists(select top 1 found = 1 from  where Username = @Username);");
+            _tempText.AppendLine("return 1 ");
+            _tempText.AppendLine("else\r\n    return 0");
+            _tempText.AppendLine("end;");
+        
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateExistsMethodForUsernameAndPasswordInGenerateStoredProcedure()
+        {
+            _tempText.AppendLine($"SP_DoesUserExistByUsername");
+            _tempText.AppendLine("@Username nvarchar(20),\r\n@Password nvarchar(20) ");
+            _tempText.AppendLine("as");
+            _tempText.AppendLine("begin");
+            _tempText.AppendLine($"if exists(select top 1 found = 1 from  where Username = @Username and Password = @Password);");
+            _tempText.AppendLine("return 1 ");
+            _tempText.AppendLine("else\r\n    return 0");
+            return _tempText.ToString();
+        }
+
+       
+        private static string _GenerateGetInfoMethodForUsernameMethodInGenerateStoredProcedure()
+        {
+            _tempText.AppendLine($"create procedure SP_GetUserInfoByUsername");
+            _tempText.AppendLine($"@Username nvarchar(20)");
+            _tempText.AppendLine($"as");
+            _tempText.AppendLine($"begin");
+            _tempText.AppendLine($"select * from   where Username = @Username");
+            _tempText.AppendLine($"end;");
+            _tempText.AppendLine($"go");
+            _tempText.AppendLine();
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateGetInfoMethodForUsernameAndPasswordMethodInGenerateStoredProcedure()
+        {
+            _tempText.AppendLine($"create procedure SP_GetUserInfoByUsername");
+            _tempText.AppendLine($"@Username nvarchar(20),\r\n@Password nvarchar(20)");
+            _tempText.AppendLine($"as");
+            _tempText.AppendLine($"begin");
+            _tempText.AppendLine($"select * from where Username = @Username and Password = @Password");
+            _tempText.AppendLine($"end;");
+            _tempText.AppendLine($"go");
+            _tempText.AppendLine();
+            return _tempText.ToString();
+        }
+
+        private static string _GenerateTestsFunctionsInGenerateStoredProcedure()
+        {
+            _tableName = _GetTableName();
+            StringBuilder initializationCode = new StringBuilder();
+
+            // Generate object creation line
+            initializationCode.AppendLine($"cls{_GetTableName()} {_GetTableName().ToLower()} = new cls{_GetTableName()}();");
+
+            // Generate property assignments
+
+            foreach (var columnList in _columnsInfo)
+            {
+                foreach (var columnInfo in columnList)
+                {
+                    initializationCode.AppendLine($"{_GetTableName().ToLower()}.{columnInfo.ColumnName} = {GetDefaultValueForType(columnInfo.DataType)};");
+                }
+            }
+
+
+
+
+            // Test methods...
+
+            _tempText.AppendLine("//static void Main(string[] args)");
+            _tempText.AppendLine("//{");
+            _tempText.AppendLine(" //   TestAddLicenses();");
+            _tempText.AppendLine(" //   TestFindLicenses();");
+            _tempText.AppendLine(" //   TestUpdateLicenses();");
+            _tempText.AppendLine(" //   TestDeleteLicenses();");
+            _tempText.AppendLine(" //   Console.ReadLine();");
+            _tempText.AppendLine("//}");
+
+            // TestAdd method
+            _tempText.AppendLine($"static void TestAdd{_tableName}()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"{initializationCode.ToString()};");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    if ({_GetTableName().ToLower()}.Save())");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"{_tableName} added successfully!\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"Failed to add {_tableName}.\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+
+            // Append all test methods
+            StringBuilder all_tempText = new StringBuilder();
+            all_tempText.AppendLine("// Test methods...");
+            all_tempText.Append(_tempText.ToString());
+
+
+
+            _tempText.AppendLine($"static void TestFind{_GetTableName()}()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    int {_GetTableName()}IdToFind = 27; // Replace with the actual {_GetTableName()} ID to find");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    cls{_GetTableName()} found{_GetTableName()} = cls{_GetTableName()}.Find({_GetTableName()}IdToFind);");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    if (found{_GetTableName()} != null)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine($\"Found {_GetTableName()}: {_GetTableName()}ID={{found{_GetTableName()}.{_GetTableName()}ID}}, Notes={{found{_GetTableName()}.Notes}}\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"{_GetTableName()} not found.\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+
+
+
+            _tempText.AppendLine($"static void TestUpdate{_GetTableName()}s()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    int {_GetTableName()}IdToUpdate = 27; // Replace with the actual {_GetTableName()} ID to update");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    cls{_GetTableName()} {_GetTableName()} = cls{_GetTableName()}.Find({_GetTableName()}IdToUpdate);");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    if ({_GetTableName()} != null)");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine($\"Current Notes: {_GetTableName()}.Notes}}\");");
+            _tempText.AppendLine();
+            _tempText.AppendLine("        // Modify the properties");
+            _tempText.AppendLine($"        {_GetTableName()}.Notes = \"Updated {_GetTableName()}\";");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"        if ({_GetTableName()}.Save())");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine($"            Console.WriteLine(\"{_GetTableName()} updated successfully!\");");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("        else");
+            _tempText.AppendLine("        {");
+            _tempText.AppendLine($"            Console.WriteLine(\"Failed to update {_GetTableName()}.\");");
+            _tempText.AppendLine("        }");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"{_GetTableName()} not found.\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+
+
+
+            _tempText.AppendLine($"static void TestDelete{_GetTableName()}s()");
+            _tempText.AppendLine("{");
+            _tempText.AppendLine($"    int {_GetTableName()}IdToDelete = 36; // Replace with the actual {_GetTableName()} ID to delete");
+            _tempText.AppendLine();
+            _tempText.AppendLine($"    if (cls{_GetTableName()}.Delete{_GetTableName()}({_GetTableName()}IdToDelete))");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"{_GetTableName()} deleted successfully!\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("    else");
+            _tempText.AppendLine("    {");
+            _tempText.AppendLine($"        Console.WriteLine(\"Failed to delete {_GetTableName()}.\");");
+            _tempText.AppendLine("    }");
+            _tempText.AppendLine("}");
+
+            return _tempText.ToString();
+        }
+
+
 
 
 

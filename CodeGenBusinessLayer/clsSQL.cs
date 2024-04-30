@@ -45,6 +45,12 @@ namespace CodeGenBusinessLayer
             return
                 clsSQLDate.GenerateBusinessLayer(columnInfo, dbName);
         }
+        
+        public static string GenerateStoredProcedure(string dbName, List<List<clsColumnInfoForDataAccess>> columnInfo)
+        {
+            return
+                clsSQLDate.GenerateGenerateStoredProcedure(columnInfo, dbName);
+        }
 
     }
 }
