@@ -31,7 +31,7 @@ namespace CodeGenDataLayer
             _dbName = dbName;
             _columnsInfo = columnsInfo;
             
-            _tableSingleName = clsSQLDate.GetTableName();
+            _tableSingleName = GetTableName();
 
             _tempText.AppendLine($"using System;\r\n" +
                $"using System.Data;\r\nusing " +
@@ -44,7 +44,7 @@ namespace CodeGenDataLayer
             // Check for additional conditions
             if (!_isGenerateAllMode)
             {
-                _isLogin = clsSQLDate._DoesTableHaveUsernameAndPassword();
+                _isLogin = DoesTableHaveUsernameAndPassword();
             }
 
 
@@ -106,19 +106,19 @@ namespace CodeGenDataLayer
         private static string _GenerateGetInfoMethodByID()
         {
            
-            _tempText.AppendLine($"public static bool Get{clsSQLDate.GetTableName()}InfoByID({_GetParametersByTableColumns(true)})");
+            _tempText.AppendLine($"public static bool Get{GetTableName()}InfoByID({_GetParametersByTableColumns(true)})");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    bool IsFound = false;");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"   {clsSQLDate.GetConnectionString()}");
+            _tempText.AppendLine($"   {GetConnectionString()}");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    string query = @\"select * from {clsSQLDate.GetTableName()}" +
-                $" where {clsSQLDate.GetTableName()}ID = @{clsSQLDate.GetTableName()}ID\";");
+            _tempText.AppendLine($"    string query = @\"select * from {GetTableName()}" +
+                $" where {GetTableName()}ID = @{GetTableName()}ID\";");
             _tempText.AppendLine("");
             _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{clsSQLDate.GetTableName()}ID\"," +
-                $" {clsSQLDate.GetTableName()}ID);");
+            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{GetTableName()}ID\"," +
+                $" {GetTableName()}ID);");
             _tempText.AppendLine("");
             _tempText.AppendLine("    try");
             _tempText.AppendLine("    {");
@@ -160,10 +160,10 @@ namespace CodeGenDataLayer
         {
 
 
-            _tempText.AppendLine($"public static int AddNew{clsSQLDate.GetTableName()}({_GetParametersByTableColumns()}) ");
-            _tempText.AppendLine($"{{    int {clsSQLDate.GetTableName()}ID = -1;");
+            _tempText.AppendLine($"public static int AddNew{GetTableName()}({_GetParametersByTableColumns()}) ");
+            _tempText.AppendLine($"{{    int {GetTableName()}ID = -1;");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
             _tempText.AppendLine($"string query = \"{_GetQueryOfInsert()}\";");
 
@@ -180,7 +180,7 @@ namespace CodeGenDataLayer
             _tempText.AppendLine("");
             _tempText.AppendLine("        if (result != null && int.TryParse(result.ToString(), out int InsertID))");
             _tempText.AppendLine("        {");
-            _tempText.AppendLine($"            {clsSQLDate.GetTableName()}ID = InsertID;");
+            _tempText.AppendLine($"            {GetTableName()}ID = InsertID;");
             _tempText.AppendLine("        }");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("    catch (Exception ex)");
@@ -192,7 +192,7 @@ namespace CodeGenDataLayer
             _tempText.AppendLine("        connection.Close();");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    return {clsSQLDate.GetTableName()}ID;");
+            _tempText.AppendLine($"    return {GetTableName()}ID;");
             _tempText.AppendLine("}");
 
             return _tempText.ToString();
@@ -201,11 +201,11 @@ namespace CodeGenDataLayer
         private static string _GenerateUpdateMethod()
         {
 
-            _tempText.AppendLine($"public static bool Update{clsSQLDate.GetTableName()}( {_GetParametersByTableColumns()})");
+            _tempText.AppendLine($"public static bool Update{GetTableName()}( {_GetParametersByTableColumns()})");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    int RowAffected = 0;");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
             _tempText.AppendLine($"    string query = \"{_GetQueryOfUpdate()}\";");
             _tempText.AppendLine("");
@@ -238,17 +238,17 @@ namespace CodeGenDataLayer
 
         private static string _GenerateDeleteMethod()
         {
-            _tempText.AppendLine($"public static bool Delete{clsSQLDate.GetTableName()}(int {clsSQLDate.GetTableName()}ID)");
+            _tempText.AppendLine($"public static bool Delete{GetTableName()}(int {GetTableName()}ID)");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    int RowAffected = 0;");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    string query = \"DELETE FROM {clsSQLDate.GetTableName()} WHERE {clsSQLDate.GetTableName()}ID = @{clsSQLDate.GetTableName()}ID\";");
+            _tempText.AppendLine($"    string query = \"DELETE FROM {GetTableName()} WHERE {GetTableName()}ID = @{GetTableName()}ID\";");
             _tempText.AppendLine("");
             _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{clsSQLDate.GetTableName()}ID\", {clsSQLDate.GetTableName()}ID);");
+            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{GetTableName()}ID\", {GetTableName()}ID);");
             _tempText.AppendLine("");
             _tempText.AppendLine("    try");
             _tempText.AppendLine("    {");
@@ -273,17 +273,17 @@ namespace CodeGenDataLayer
 
         private static string _GenerateExistsMethod()
         {
-            _tempText.AppendLine($"public static bool IS{clsSQLDate.GetTableName()}Exists(int {clsSQLDate.GetTableName()}ID)");
+            _tempText.AppendLine($"public static bool IS{GetTableName()}Exists(int {GetTableName()}ID)");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    bool exists = false;");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    string query = \"SELECT found=1 FROM {clsSQLDate.GetTableName()} WHERE {clsSQLDate.GetTableName()}ID = @{clsSQLDate.GetTableName()}ID\";");
+            _tempText.AppendLine($"    string query = \"SELECT found=1 FROM {GetTableName()} WHERE {GetTableName()}ID = @{GetTableName()}ID\";");
             _tempText.AppendLine("");
             _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{clsSQLDate.GetTableName()}ID\", {clsSQLDate.GetTableName()}ID);");
+            _tempText.AppendLine($"    command.Parameters.AddWithValue(\"@{GetTableName()}ID\", {GetTableName()}ID);");
             _tempText.AppendLine("");
             _tempText.AppendLine("    try");
             _tempText.AppendLine("    {");
@@ -309,13 +309,13 @@ namespace CodeGenDataLayer
 
         private static string _GenerateGetAllMethod()
         {
-            _tempText.AppendLine($"public static DataTable GetAll{clsSQLDate.GetTableName()}()");
+            _tempText.AppendLine($"public static DataTable GetAll{GetTableName()}()");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    DataTable dt = new DataTable();");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    string query = \"SELECT * FROM {clsSQLDate.GetTableName()}_view\";");
+            _tempText.AppendLine($"    string query = \"SELECT * FROM {GetTableName()}_view\";");
             _tempText.AppendLine("");
             _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
             _tempText.AppendLine("");
@@ -349,13 +349,13 @@ namespace CodeGenDataLayer
 
         private static string _GenerateGetInfoMethodForUsername()
         {
-            _tempText.AppendLine($"public static DataTable GetInfo{clsSQLDate.GetTableName()}ForUsername(string username)");
+            _tempText.AppendLine($"public static DataTable GetInfo{GetTableName()}ForUsername(string username)");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    DataTable dt = new DataTable();");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    string query = \"SELECT * FROM {clsSQLDate.GetTableName()}_view WHERE Username = @Username\";");
+            _tempText.AppendLine($"    string query = \"SELECT * FROM {GetTableName()}_view WHERE Username = @Username\";");
             _tempText.AppendLine("");
             _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
             _tempText.AppendLine("");
@@ -391,13 +391,13 @@ namespace CodeGenDataLayer
 
         private static string _GenerateGetInfoMethodForUsernameAndPassword()
         {
-            _tempText.AppendLine($"public static DataTable GetInfo{clsSQLDate.GetTableName()}ForUsernameAndPassword(string username, string password)");
+            _tempText.AppendLine($"public static DataTable GetInfo{GetTableName()}ForUsernameAndPassword(string username, string password)");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    DataTable dt = new DataTable();");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    string query = \"SELECT * FROM {clsSQLDate.GetTableName()}_view WHERE Username = @Username AND Password = @Password\";");
+            _tempText.AppendLine($"    string query = \"SELECT * FROM {GetTableName()}_view WHERE Username = @Username AND Password = @Password\";");
             _tempText.AppendLine("");
             _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
             _tempText.AppendLine("");
@@ -434,13 +434,13 @@ namespace CodeGenDataLayer
 
         private static string _GenerateExistsMethodForUsername()
         {
-            _tempText.AppendLine($"public static bool Exists{clsSQLDate.GetTableName()}ForUsername(string username)");
+            _tempText.AppendLine($"public static bool Exists{GetTableName()}ForUsername(string username)");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    bool exists = false;");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    string query = \"SELECT Found=1 FROM {clsSQLDate.GetTableName()}_view WHERE Username = @Username\";");
+            _tempText.AppendLine($"    string query = \"SELECT Found=1 FROM {GetTableName()}_view WHERE Username = @Username\";");
             _tempText.AppendLine("");
             _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
             _tempText.AppendLine("");
@@ -470,13 +470,13 @@ namespace CodeGenDataLayer
 
         private static string _GenerateExistsMethodForUsernameAndPassword()
         {
-            _tempText.AppendLine($"public static bool Exists{clsSQLDate.GetTableName()}ForUsernameAndPassword(string username, string password)");
+            _tempText.AppendLine($"public static bool Exists{GetTableName()}ForUsernameAndPassword(string username, string password)");
             _tempText.AppendLine("{");
             _tempText.AppendLine("    bool exists = false;");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    {clsSQLDate.GetConnectionString()};");
+            _tempText.AppendLine($"    {GetConnectionString()};");
             _tempText.AppendLine("");
-            _tempText.AppendLine($"    string query = \"SELECT Found=1 FROM {clsSQLDate.GetTableName()}_view WHERE Username = @Username AND Password = @Password\";");
+            _tempText.AppendLine($"    string query = \"SELECT Found=1 FROM {GetTableName()}_view WHERE Username = @Username AND Password = @Password\";");
             _tempText.AppendLine("");
             _tempText.AppendLine("    SqlCommand command = new SqlCommand(query, connection);");
             _tempText.AppendLine("");
@@ -605,7 +605,7 @@ namespace CodeGenDataLayer
             columnNames = columnNames.TrimEnd(',', ' ');
             parameters = parameters.TrimEnd(',', ' ');
 
-            string insertQuery = $"INSERT INTO {clsSQLDate.GetTableName()} " +
+            string insertQuery = $"INSERT INTO {GetTableName()} " +
                 $"({columnNames}) VALUES ({parameters}); SELECT SCOPE_IDENTITY();";
 
             return insertQuery;
@@ -629,10 +629,42 @@ namespace CodeGenDataLayer
             setClause = setClause.TrimEnd(',', ' ');
 
             // Construct the UPDATE query
-            string updateQuery = $"UPDATE {clsSQLDate.GetTableName()} SET {setClause} WHERE {clsSQLDate.GetTableName()}" +
-                $"ID = @{clsSQLDate.GetTableName()}ID;";
+            string updateQuery = $"UPDATE {GetTableName()} SET {setClause} WHERE {GetTableName()}" +
+                $"ID = @{GetTableName()}ID;";
 
             return updateQuery;
+        }
+
+        public static string GetConnectionString()
+        {
+            return "SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);";
+        }
+
+        public static string GetTableName()
+        {
+            if (_columnsInfo.Count > 0)
+            {
+                string firstValue = _columnsInfo[0][0].ColumnName;
+                return firstValue.Remove(firstValue.Length - 2);
+            }
+            return string.Empty;
+        }
+
+        public static bool DoesTableHaveColumn(string columnName)
+        {
+            foreach (var row in _columnsInfo)
+            {
+                if (row.Count > 0 && row[0].ColumnName.Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool DoesTableHaveUsernameAndPassword()
+        {
+            return (DoesTableHaveColumn("username") && DoesTableHaveColumn("password"));
         }
 
 

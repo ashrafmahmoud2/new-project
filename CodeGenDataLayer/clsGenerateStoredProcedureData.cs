@@ -28,11 +28,11 @@ namespace CodeGenDataLayer
             _tempText = new StringBuilder();
             _dbName = dbName;
             _columnsInfo = columnsInfo;
-            _tableSingleName = clsSQLDate.GetTableName();
+            _tableSingleName = GetTableName();
 
             if (!_isGenerateAllMode)
             {
-                _isLogin = clsSQLDate._DoesTableHaveUsernameAndPassword();
+                _isLogin = DoesTableHaveUsernameAndPassword();
             }
 
             if (_isLogin)
@@ -148,14 +148,14 @@ namespace CodeGenDataLayer
         {
 
 
-            _tempText.AppendLine($"create procedure SP_AddNew{clsSQLDate.GetTableName()}");
+            _tempText.AppendLine($"create procedure SP_AddNew{GetTableName()}");
             _tempText.AppendLine($"{_GetParmterForGenerateStoredProcedure(true, false, true)}");
-            _tempText.AppendLine($", @New{clsSQLDate.GetTableName()}ID int output");
+            _tempText.AppendLine($", @New{GetTableName()}ID int output");
             _tempText.AppendLine($"as");
             _tempText.AppendLine($"begin");
-            _tempText.AppendLine($"insert into {clsSQLDate.GetTableName()} ({_GetParmterForGenerateStoredProcedure(false)})" +
+            _tempText.AppendLine($"insert into {GetTableName()} ({_GetParmterForGenerateStoredProcedure(false)})" +
                 $"\r\nvalues({_GetParmterForGenerateStoredProcedure()})" +
-                $"\r\nset @New{clsSQLDate.GetTableName()}ID = scope_identity();");
+                $"\r\nset @New{GetTableName()}ID = scope_identity();");
             _tempText.AppendLine($"end;");
             _tempText.AppendLine($"go");
             _tempText.AppendLine();
@@ -167,11 +167,11 @@ namespace CodeGenDataLayer
         {
 
 
-            _tempText.AppendLine($"create procedure SP_Update{clsSQLDate.GetTableName()}");
+            _tempText.AppendLine($"create procedure SP_Update{GetTableName()}");
             _tempText.AppendLine($"{_GetParmterForGenerateStoredProcedure(true, false, true)}");
             _tempText.AppendLine($"as");
             _tempText.AppendLine($"begin");
-            _tempText.AppendLine($"Update {clsSQLDate.GetTableName()}");
+            _tempText.AppendLine($"Update {GetTableName()}");
 
             _tempText.AppendLine($"set {_GetParmterForGenerateStoredProcedure(true, true)}");
 
@@ -185,11 +185,11 @@ namespace CodeGenDataLayer
         private static string _GenerateDeleteMethodInGenerateStoredProcedure()
         {
 
-            _tempText.AppendLine($"create procedure SP_Delete{clsSQLDate.GetTableName()}");
-            _tempText.AppendLine($"@{clsSQLDate.GetTableName()}ID  int");
+            _tempText.AppendLine($"create procedure SP_Delete{GetTableName()}");
+            _tempText.AppendLine($"@{GetTableName()}ID  int");
             _tempText.AppendLine($"as");
             _tempText.AppendLine($"begin");
-            _tempText.AppendLine($"delete  from {clsSQLDate.GetTableName()}   where {clsSQLDate.GetTableName()}ID = @{clsSQLDate.GetTableName()}ID");
+            _tempText.AppendLine($"delete  from {GetTableName()}   where {GetTableName()}ID = @{GetTableName()}ID");
             _tempText.AppendLine($"end;");
             _tempText.AppendLine($"go");
             _tempText.AppendLine();
@@ -198,11 +198,11 @@ namespace CodeGenDataLayer
 
         private static string _GenerateFindMethodInGenerateStoredProcedure()
         {
-            _tempText.AppendLine($"create procedure SP_Get{clsSQLDate.GetTableName()}InfoByID");
-            _tempText.AppendLine($"{clsSQLDate.GetTableName()}ID  int");
+            _tempText.AppendLine($"create procedure SP_Get{GetTableName()}InfoByID");
+            _tempText.AppendLine($"{GetTableName()}ID  int");
             _tempText.AppendLine($"as");
             _tempText.AppendLine($"begin");
-            _tempText.AppendLine($"select * from  {clsSQLDate.GetTableName()}  where {clsSQLDate.GetTableName()}ID = @{clsSQLDate.GetTableName()}ID");
+            _tempText.AppendLine($"select * from  {GetTableName()}  where {GetTableName()}ID = @{GetTableName()}ID");
             _tempText.AppendLine($"end;");
             _tempText.AppendLine($"go");
             _tempText.AppendLine();
@@ -212,10 +212,10 @@ namespace CodeGenDataLayer
 
         private static string _GenerateGetAllMethodInGenerateStoredProcedure()
         {
-            _tempText.AppendLine($"create procedure SP_GetAll{clsSQLDate.GetTableName()}()");
+            _tempText.AppendLine($"create procedure SP_GetAll{GetTableName()}()");
             _tempText.AppendLine("as");
             _tempText.AppendLine("begin");
-            _tempText.AppendLine($"  select * from {clsSQLDate.GetTableName()};");
+            _tempText.AppendLine($"  select * from {GetTableName()};");
             _tempText.AppendLine("end;");
             _tempText.AppendLine("go;");
             return _tempText.ToString();
@@ -223,11 +223,11 @@ namespace CodeGenDataLayer
 
         private static string _Generate_DoesExistMethodInGenerateStoredProcedure()
         {
-            _tempText.AppendLine($"create procedure SP_Does{clsSQLDate.GetTableName()}Exist");
-            _tempText.AppendLine("@{clsSQLDate.GetTableName()} int ");
+            _tempText.AppendLine($"create procedure SP_Does{GetTableName()}Exist");
+            _tempText.AppendLine("@{GetTableName()} int ");
             _tempText.AppendLine("as");
             _tempText.AppendLine("begin");
-            _tempText.AppendLine($"  if exists(select top 1 found = 1 from  where {clsSQLDate.GetTableName()}ID = @{clsSQLDate.GetTableName()}ID);");
+            _tempText.AppendLine($"  if exists(select top 1 found = 1 from  where {GetTableName()}ID = @{GetTableName()}ID);");
             _tempText.AppendLine("return 1 ");
             _tempText.AppendLine("else\r\n    return 0");
             _tempText.AppendLine("end;");
@@ -289,11 +289,11 @@ namespace CodeGenDataLayer
 
         private static string _GenerateTestsFunctionsInGenerateStoredProcedure()
         {
-            _tableName = clsSQLDate.GetTableName();
+            _tableName = GetTableName();
             StringBuilder initializationCode = new StringBuilder();
 
             // Generate object creation line
-            initializationCode.AppendLine($"cls{clsSQLDate.GetTableName()} {clsSQLDate.GetTableName().ToLower()} = new cls{clsSQLDate.GetTableName()}();");
+            initializationCode.AppendLine($"cls{GetTableName()} {GetTableName().ToLower()} = new cls{GetTableName()}();");
 
             // Generate property assignments
 
@@ -301,7 +301,7 @@ namespace CodeGenDataLayer
             {
                 foreach (var columnInfo in columnList)
                 {
-                    initializationCode.AppendLine($"{clsSQLDate.GetTableName().ToLower()}.{columnInfo.ColumnName} = {clsGenerateBusinessLayer_Data.GetDefaultValueForType(columnInfo.DataType)};");
+                    initializationCode.AppendLine($"{GetTableName().ToLower()}.{columnInfo.ColumnName} = {clsGenerateBusinessLayer_Data.GetDefaultValueForType(columnInfo.DataType)};");
                 }
             }
 
@@ -324,7 +324,7 @@ namespace CodeGenDataLayer
             _tempText.AppendLine("{");
             _tempText.AppendLine($"{initializationCode.ToString()};");
             _tempText.AppendLine();
-            _tempText.AppendLine($"    if ({clsSQLDate.GetTableName().ToLower()}.Save())");
+            _tempText.AppendLine($"    if ({GetTableName().ToLower()}.Save())");
             _tempText.AppendLine("    {");
             _tempText.AppendLine($"        Console.WriteLine(\"{_tableName} added successfully!\");");
             _tempText.AppendLine("    }");
@@ -341,69 +341,96 @@ namespace CodeGenDataLayer
 
 
 
-            _tempText.AppendLine($"static void TestFind{clsSQLDate.GetTableName()}()");
+            _tempText.AppendLine($"static void TestFind{GetTableName()}()");
             _tempText.AppendLine("{");
-            _tempText.AppendLine($"    int {clsSQLDate.GetTableName()}IdToFind = 27; // Replace with the actual {clsSQLDate.GetTableName()} ID to find");
+            _tempText.AppendLine($"    int {GetTableName()}IdToFind = 27; // Replace with the actual {GetTableName()} ID to find");
             _tempText.AppendLine();
-            _tempText.AppendLine($"    cls{clsSQLDate.GetTableName()} found{clsSQLDate.GetTableName()} = cls{clsSQLDate.GetTableName()}.Find({clsSQLDate.GetTableName()}IdToFind);");
+            _tempText.AppendLine($"    cls{GetTableName()} found{GetTableName()} = cls{GetTableName()}.Find({GetTableName()}IdToFind);");
             _tempText.AppendLine();
-            _tempText.AppendLine($"    if (found{clsSQLDate.GetTableName()} != null)");
+            _tempText.AppendLine($"    if (found{GetTableName()} != null)");
             _tempText.AppendLine("    {");
-            _tempText.AppendLine($"        Console.WriteLine($\"Found {clsSQLDate.GetTableName()}: {clsSQLDate.GetTableName()}ID={{found{clsSQLDate.GetTableName()}.{clsSQLDate.GetTableName()}ID}}, Notes={{found{clsSQLDate.GetTableName()}.Notes}}\");");
+            _tempText.AppendLine($"        Console.WriteLine($\"Found {GetTableName()}: {GetTableName()}ID={{found{GetTableName()}.{GetTableName()}ID}}, Notes={{found{GetTableName()}.Notes}}\");");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("    else");
             _tempText.AppendLine("    {");
-            _tempText.AppendLine($"        Console.WriteLine(\"{clsSQLDate.GetTableName()} not found.\");");
+            _tempText.AppendLine($"        Console.WriteLine(\"{GetTableName()} not found.\");");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("}");
 
 
 
-            _tempText.AppendLine($"static void TestUpdate{clsSQLDate.GetTableName()}s()");
+            _tempText.AppendLine($"static void TestUpdate{GetTableName()}s()");
             _tempText.AppendLine("{");
-            _tempText.AppendLine($"    int {clsSQLDate.GetTableName()}IdToUpdate = 27; // Replace with the actual {clsSQLDate.GetTableName()} ID to update");
+            _tempText.AppendLine($"    int {GetTableName()}IdToUpdate = 27; // Replace with the actual {GetTableName()} ID to update");
             _tempText.AppendLine();
-            _tempText.AppendLine($"    cls{clsSQLDate.GetTableName()} {clsSQLDate.GetTableName()} = cls{clsSQLDate.GetTableName()}.Find({clsSQLDate.GetTableName()}IdToUpdate);");
+            _tempText.AppendLine($"    cls{GetTableName()} {GetTableName()} = cls{GetTableName()}.Find({GetTableName()}IdToUpdate);");
             _tempText.AppendLine();
-            _tempText.AppendLine($"    if ({clsSQLDate.GetTableName()} != null)");
+            _tempText.AppendLine($"    if ({GetTableName()} != null)");
             _tempText.AppendLine("    {");
-            _tempText.AppendLine($"        Console.WriteLine($\"Current Notes: {clsSQLDate.GetTableName()}.Notes}}\");");
+            _tempText.AppendLine($"        Console.WriteLine($\"Current Notes: {GetTableName()}.Notes}}\");");
             _tempText.AppendLine();
             _tempText.AppendLine("        // Modify the properties");
-            _tempText.AppendLine($"        {clsSQLDate.GetTableName()}.Notes = \"Updated {clsSQLDate.GetTableName()}\";");
+            _tempText.AppendLine($"        {GetTableName()}.Notes = \"Updated {GetTableName()}\";");
             _tempText.AppendLine();
-            _tempText.AppendLine($"        if ({clsSQLDate.GetTableName()}.Save())");
+            _tempText.AppendLine($"        if ({GetTableName()}.Save())");
             _tempText.AppendLine("        {");
-            _tempText.AppendLine($"            Console.WriteLine(\"{clsSQLDate.GetTableName()} updated successfully!\");");
+            _tempText.AppendLine($"            Console.WriteLine(\"{GetTableName()} updated successfully!\");");
             _tempText.AppendLine("        }");
             _tempText.AppendLine("        else");
             _tempText.AppendLine("        {");
-            _tempText.AppendLine($"            Console.WriteLine(\"Failed to update {clsSQLDate.GetTableName()}.\");");
+            _tempText.AppendLine($"            Console.WriteLine(\"Failed to update {GetTableName()}.\");");
             _tempText.AppendLine("        }");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("    else");
             _tempText.AppendLine("    {");
-            _tempText.AppendLine($"        Console.WriteLine(\"{clsSQLDate.GetTableName()} not found.\");");
+            _tempText.AppendLine($"        Console.WriteLine(\"{GetTableName()} not found.\");");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("}");
 
 
 
-            _tempText.AppendLine($"static void TestDelete{clsSQLDate.GetTableName()}s()");
+            _tempText.AppendLine($"static void TestDelete{GetTableName()}s()");
             _tempText.AppendLine("{");
-            _tempText.AppendLine($"    int {clsSQLDate.GetTableName()}IdToDelete = 36; // Replace with the actual {clsSQLDate.GetTableName()} ID to delete");
+            _tempText.AppendLine($"    int {GetTableName()}IdToDelete = 36; // Replace with the actual {GetTableName()} ID to delete");
             _tempText.AppendLine();
-            _tempText.AppendLine($"    if (cls{clsSQLDate.GetTableName()}.Delete{clsSQLDate.GetTableName()}({clsSQLDate.GetTableName()}IdToDelete))");
+            _tempText.AppendLine($"    if (cls{GetTableName()}.Delete{GetTableName()}({GetTableName()}IdToDelete))");
             _tempText.AppendLine("    {");
-            _tempText.AppendLine($"        Console.WriteLine(\"{clsSQLDate.GetTableName()} deleted successfully!\");");
+            _tempText.AppendLine($"        Console.WriteLine(\"{GetTableName()} deleted successfully!\");");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("    else");
             _tempText.AppendLine("    {");
-            _tempText.AppendLine($"        Console.WriteLine(\"Failed to delete {clsSQLDate.GetTableName()}.\");");
+            _tempText.AppendLine($"        Console.WriteLine(\"Failed to delete {GetTableName()}.\");");
             _tempText.AppendLine("    }");
             _tempText.AppendLine("}");
 
             return _tempText.ToString();
+        }
+
+        public static string GetTableName()
+        {
+            if (_columnsInfo.Count > 0)
+            {
+                string firstValue = _columnsInfo[0][0].ColumnName;
+                return firstValue.Remove(firstValue.Length - 2);
+            }
+            return string.Empty;
+        }
+
+        public static bool DoesTableHaveColumn(string columnName)
+        {
+            foreach (var row in _columnsInfo)
+            {
+                if (row.Count > 0 && row[0].ColumnName.Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool DoesTableHaveUsernameAndPassword()
+        {
+            return (DoesTableHaveColumn("username") && DoesTableHaveColumn("password"));
         }
 
 
@@ -479,6 +506,8 @@ namespace CodeGenDataLayer
 
             return isGenerated;
         }
+
+
 
 
 

@@ -65,7 +65,7 @@ namespace CodeGenBusinessLayer
 
         public static string GenerateDelegateHelperMethods(string DBName)
         {
-            return clsSQLDate.GenerateDelegateHelperMethods(DBName);
+            return clsGenerateDelegateHelperMethod_Data.GenerateDelegateHelperMethods(DBName);
         }
 
         public static bool GenerateDataAccessInFilePath(string DBName, string DataAccessPath)

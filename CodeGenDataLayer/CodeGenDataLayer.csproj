@@ -48,6 +48,7 @@
     <Compile Include="clsconnectionString.cs" />
     <Compile Include="clsGenerateBusinessLayer_Data.cs" />
     <Compile Include="clsGenerateDataLayer_Data.cs" />
+    <Compile Include="clsGenerateDelegateHelperMethod_Data.cs" />
     <Compile Include="clsGenerateStoredProcedureData.cs" />
     <Compile Include="clsSQLDate.cs" />
     <Compile Include="Program.cs" />
