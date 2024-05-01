@@ -38,32 +38,66 @@ namespace CodeGenBusinessLayer
         public static string GenerateDataLayer(string dbName, List<List<clsColumnInfoForDataAccess>> columnInfo)
         {
             return 
-                clsSQLDate.GenerateDataLayer( columnInfo, dbName);
+                clsGenerateDataLayer_Data.GenerateDataLayer( columnInfo, dbName);
         }
+
         public static string GenerateBusinessLayer(string dbName, List<List<clsColumnInfoForDataAccess>> columnInfo)
         {
             return
-                clsSQLDate.GenerateBusinessLayer(columnInfo, dbName);
+                clsGenerateBusinessLayer_Data.GenerateBusinessLayer(columnInfo, dbName);
         }
         
         public static string GenerateStoredProcedure(string dbName, List<List<clsColumnInfoForDataAccess>> columnInfo)
         {
             return
-                clsSQLDate.GenerateGenerateStoredProcedure(columnInfo, dbName);
+                clsGenerateStoredProcedureData.GenerateGenerateStoredProcedure(columnInfo, dbName);
         }
        
         public static string GenerateErrorLogger(string DBName)
         {
             return clsSQLDate.GenerateErrorLogger(DBName);
         }
+
         public static string GenerateLogHandler(string DBName)
         {
             return clsSQLDate.GenerateLogHandler(DBName);
         }
+
         public static string GenerateDelegateHelperMethods(string DBName)
         {
             return clsSQLDate.GenerateDelegateHelperMethods(DBName);
         }
+
+        public static bool GenerateDataAccessInFilePath(string DBName, string DataAccessPath)
+        {
+            return clsGenerateDataLayer_Data.GenerateDataAccessInFilePath(DBName,DataAccessPath);
+        }
+
+        public static List<string> GetTablesNameByDBByList(string DBName)
+        {
+           return clsSQLDate.GetTablesNameByDBByList(DBName);
+        }
+
+        public static bool GenerateBusinessClasInFilePath(string DBName, string DataAccessPath)
+        {
+            return clsGenerateBusinessLayer_Data.GenerateBusinessClasInFilePath(DBName, DataAccessPath);
+        }
+        
+        public static bool GenerateAppconfigInFilePath( string DataAccessPath, string DBName)
+        {
+            return clsSQLDate.GenerateAppconfigInFilePath(DataAccessPath,DBName );
+        }
+        
+        public static bool GenerateStoredProceduresToAllTables( string DBName)
+        {
+            return clsGenerateStoredProcedureData.GenerateStoredProceduresToAllTables(DBName);
+        }
+        
+        public static bool GenerateStoredProceduresToSelectedTable(string DBName,string SelectedTable )
+        {
+            return clsGenerateStoredProcedureData.GenerateStoredProceduresToSelectedTable(DBName, SelectedTable);
+        }
+
 
     }
 }

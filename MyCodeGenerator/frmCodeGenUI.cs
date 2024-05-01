@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using CodeGenBusinessLayer;
 using CodeGenDataLayer;
 using GenerateDataAccessLayerLibrary;
@@ -70,10 +71,10 @@ namespace MyCodeGenerator
         {
             if (e.RowIndex >= 0)
             {
-                string tableName = DGVTablesName.Rows[e.RowIndex].Cells[0].Value.ToString();
+                 _tableName = DGVTablesName.Rows[e.RowIndex].Cells[0].Value.ToString();
                 string dbName = comboDatabaseName.SelectedItem.ToString();
 
-                DataTable data = clsSQL.GetTableInfo(tableName, dbName);
+                DataTable data = clsSQL.GetTableInfo(_tableName, dbName);
                 DGVTableInfo.DataSource = data;
 
                 //listviewColumnsInfo.Columns.Clear();
@@ -188,11 +189,14 @@ namespace MyCodeGenerator
                 //MessageBox.Show("the Tabel Name =" + FirstValue.Remove(FirstValue.Length - 2));
 
                 //to get test ;
-                List<List<clsColumnInfoForDataAccess>> _columnsInfoForDataAccess = new List<List<clsColumnInfoForDataAccess>>();
+                List<List<clsColumnInfoForDataAccess>> _columnsInfoForDataAccess =
+                    new List<List<clsColumnInfoForDataAccess>>();
                 for (int i = 1; i <= 6; i++)
                 {
-                    List<clsColumnInfoForDataAccess> columnInfoList = new List<clsColumnInfoForDataAccess>();
-                    columnInfoList.Add(new clsColumnInfoForDataAccess { ColumnName = $"Column{i}", DataType = $"int", IsNullable = i % 2 == 0 });
+                    List<clsColumnInfoForDataAccess> columnInfoList =
+                        new List<clsColumnInfoForDataAccess>();
+                    columnInfoList.Add(new clsColumnInfoForDataAccess 
+                    { ColumnName = $"Column{i}", DataType = $"int", IsNullable = i % 2 == 0 });
                     _columnsInfoForDataAccess.Add(columnInfoList);
                 }
 
@@ -213,11 +217,7 @@ namespace MyCodeGenerator
             }
             else
             {
-                //to test;
-                //String FirstValue = _columnsInfoForDataAccess[0][0].ColumnName;
-                //MessageBox.Show("the Tabel Name =" + FirstValue.Remove(FirstValue.Length - 2));
-
-                //to get test ;
+               
                 List<List<clsColumnInfoForDataAccess>> _columnsInfoForDataAccess = new List<List<clsColumnInfoForDataAccess>>();
                 for (int i = 1; i <= 6; i++)
                 {
@@ -231,9 +231,7 @@ namespace MyCodeGenerator
                  clsSQL.
                     GenerateBusinessLayer(comboDatabaseName.Text, _columnsInfoForDataAccess);
 
-               // guna2TextBox1.Text =
-               //clsSQL.
-               //   GenerateBusinessLayer(comboDatabaseName.Text, _columnsInfoForDataAccess);
+              
             }
         }
 
@@ -308,5 +306,148 @@ namespace MyCodeGenerator
 
            clsSQL.GenerateDelegateHelperMethods(comboDatabaseName.SelectedItem.ToString());
         }
+
+        private void btnGenerateDataAccess_Click(object sender, EventArgs e)
+        {
+            if (comboDatabaseName.SelectedItem == null || string.IsNullOrWhiteSpace(comboDatabaseName.SelectedItem.ToString()))
+            {
+                MessageBox.Show("Please select a database.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+
+            try
+            {
+                if (clsSQL.GenerateDataAccessInFilePath(comboDatabaseName.Text, txtDataAccessPath.Text))
+                {
+                    MessageBox.Show("Data access files added successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Failed to add data access files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+
+
+        }
+
+        private void btnGenerateBusiness_Click(object sender, EventArgs e)
+        {
+            if (comboDatabaseName.SelectedItem == null || string.IsNullOrWhiteSpace(comboDatabaseName.SelectedItem.ToString()))
+            {
+                MessageBox.Show("Please select a database.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+
+            try
+            {
+                if (clsSQL.GenerateBusinessClasInFilePath(comboDatabaseName.Text, txtDataAccessPath.Text))
+                {
+                    MessageBox.Show("Business Clas files added successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Failed to add Business Class files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnGenerateAppConfig_Click(object sender, EventArgs e)
+        {
+            if (comboDatabaseName.SelectedItem == null || string.IsNullOrWhiteSpace(comboDatabaseName.SelectedItem.ToString()))
+            {
+                MessageBox.Show("Please select a database.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+
+            try
+            {
+                if (clsSQL.GenerateAppconfigInFilePath(txtAppConfigPath.Text.Trim(), comboDatabaseName.Text))
+                {
+                    MessageBox.Show("App.config file updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Failed to update App.config file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            
+        }
+
+        private void btnGenerateStoredProceduresToAllTables_Click(object sender, EventArgs e)
+        {
+            if (comboDatabaseName.SelectedItem == null || string.IsNullOrWhiteSpace(comboDatabaseName.SelectedItem.ToString()))
+            {
+                MessageBox.Show("Please select a database.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+
+            try
+            {
+                if (clsSQL.GenerateStoredProceduresToAllTables(comboDatabaseName.Text))
+                {
+                    MessageBox.Show("App.config file updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Failed to update App.config file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void brnGenerateStoredProceduresToSelectedTable_Click(object sender, EventArgs e)
+        {
+            if (comboDatabaseName.SelectedItem == null ||
+        string.IsNullOrWhiteSpace(comboDatabaseName.SelectedItem.ToString()) ||
+        DGVTableInfo.DataSource == null)
+            {
+                MessageBox.Show("Please select a database and a table.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+
+            try
+            {
+                if (clsSQL.GenerateStoredProceduresToSelectedTable(comboDatabaseName.Text, _tableName))
+                {
+                    MessageBox.Show("App.config file updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Failed to update App.config file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+
+        }
+
     }
 }

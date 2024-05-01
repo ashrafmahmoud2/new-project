@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle52 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle53 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle54 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle49 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle50 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle51 = new System.Windows.Forms.DataGridViewCellStyle();
             this.guna2CustomGradientPanel1 = new Guna.UI2.WinForms.Guna2CustomGradientPanel();
             this.label9 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -402,25 +402,25 @@
             // 
             // DGVTableInfo
             // 
-            dataGridViewCellStyle7.BackColor = System.Drawing.Color.White;
-            this.DGVTableInfo.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle7;
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(88)))), ((int)(((byte)(255)))));
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.DGVTableInfo.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle52.BackColor = System.Drawing.Color.White;
+            this.DGVTableInfo.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle52;
+            dataGridViewCellStyle53.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle53.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(88)))), ((int)(((byte)(255)))));
+            dataGridViewCellStyle53.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle53.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle53.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle53.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle53.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.DGVTableInfo.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle53;
             this.DGVTableInfo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle9.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle9.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(69)))), ((int)(((byte)(94)))));
-            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
-            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(69)))), ((int)(((byte)(94)))));
-            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.DGVTableInfo.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle54.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle54.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle54.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle54.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(69)))), ((int)(((byte)(94)))));
+            dataGridViewCellStyle54.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
+            dataGridViewCellStyle54.SelectionForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(69)))), ((int)(((byte)(94)))));
+            dataGridViewCellStyle54.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.DGVTableInfo.DefaultCellStyle = dataGridViewCellStyle54;
             this.DGVTableInfo.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
             this.DGVTableInfo.Location = new System.Drawing.Point(20, 17);
             this.DGVTableInfo.Name = "DGVTableInfo";
@@ -471,11 +471,11 @@
             this.guna2GroupBox4.Controls.Add(this.label7);
             this.guna2GroupBox4.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2GroupBox4.ForeColor = System.Drawing.Color.Black;
-            this.guna2GroupBox4.Location = new System.Drawing.Point(6, 244);
+            this.guna2GroupBox4.Location = new System.Drawing.Point(11, 253);
             this.guna2GroupBox4.Name = "guna2GroupBox4";
-            this.guna2GroupBox4.Size = new System.Drawing.Size(846, 98);
+            this.guna2GroupBox4.Size = new System.Drawing.Size(912, 98);
             this.guna2GroupBox4.TabIndex = 31;
-            this.guna2GroupBox4.Text = "App.config";
+            this.guna2GroupBox4.Text = "Generate App.config  In File Path";
             // 
             // btnGenerateAppConfig
             // 
@@ -489,11 +489,12 @@
             this.btnGenerateAppConfig.FillColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(126)))), ((int)(((byte)(205)))));
             this.btnGenerateAppConfig.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold);
             this.btnGenerateAppConfig.ForeColor = System.Drawing.Color.White;
-            this.btnGenerateAppConfig.Location = new System.Drawing.Point(745, 62);
+            this.btnGenerateAppConfig.Location = new System.Drawing.Point(801, 68);
             this.btnGenerateAppConfig.Name = "btnGenerateAppConfig";
             this.btnGenerateAppConfig.Size = new System.Drawing.Size(92, 27);
             this.btnGenerateAppConfig.TabIndex = 25;
             this.btnGenerateAppConfig.Text = "Generate";
+            this.btnGenerateAppConfig.Click += new System.EventHandler(this.btnGenerateAppConfig_Click);
             // 
             // txtAppConfigPath
             // 
@@ -502,7 +503,7 @@
             this.txtAppConfigPath.Location = new System.Drawing.Point(55, 54);
             this.txtAppConfigPath.Multiline = true;
             this.txtAppConfigPath.Name = "txtAppConfigPath";
-            this.txtAppConfigPath.Size = new System.Drawing.Size(762, 30);
+            this.txtAppConfigPath.Size = new System.Drawing.Size(825, 30);
             this.txtAppConfigPath.TabIndex = 24;
             // 
             // label7
@@ -524,11 +525,11 @@
             this.guna2GroupBox2.Controls.Add(this.label4);
             this.guna2GroupBox2.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2GroupBox2.ForeColor = System.Drawing.Color.Black;
-            this.guna2GroupBox2.Location = new System.Drawing.Point(6, 128);
+            this.guna2GroupBox2.Location = new System.Drawing.Point(11, 129);
             this.guna2GroupBox2.Name = "guna2GroupBox2";
-            this.guna2GroupBox2.Size = new System.Drawing.Size(846, 98);
+            this.guna2GroupBox2.Size = new System.Drawing.Size(912, 98);
             this.guna2GroupBox2.TabIndex = 29;
-            this.guna2GroupBox2.Text = "Business Layer";
+            this.guna2GroupBox2.Text = "Generate Business Access Class In File Path";
             // 
             // btnGenerateBusiness
             // 
@@ -542,11 +543,12 @@
             this.btnGenerateBusiness.FillColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(126)))), ((int)(((byte)(205)))));
             this.btnGenerateBusiness.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold);
             this.btnGenerateBusiness.ForeColor = System.Drawing.Color.White;
-            this.btnGenerateBusiness.Location = new System.Drawing.Point(745, 61);
+            this.btnGenerateBusiness.Location = new System.Drawing.Point(801, 65);
             this.btnGenerateBusiness.Name = "btnGenerateBusiness";
             this.btnGenerateBusiness.Size = new System.Drawing.Size(92, 27);
             this.btnGenerateBusiness.TabIndex = 25;
             this.btnGenerateBusiness.Text = "Generate";
+            this.btnGenerateBusiness.Click += new System.EventHandler(this.btnGenerateBusiness_Click);
             // 
             // txtBusinessPath
             // 
@@ -555,7 +557,7 @@
             this.txtBusinessPath.Location = new System.Drawing.Point(55, 51);
             this.txtBusinessPath.Multiline = true;
             this.txtBusinessPath.Name = "txtBusinessPath";
-            this.txtBusinessPath.Size = new System.Drawing.Size(762, 30);
+            this.txtBusinessPath.Size = new System.Drawing.Size(825, 30);
             this.txtBusinessPath.TabIndex = 24;
             // 
             // label4
@@ -576,9 +578,9 @@
             this.guna2GroupBox3.Controls.Add(this.brnGenerateStoredProceduresToSelectedTable);
             this.guna2GroupBox3.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2GroupBox3.ForeColor = System.Drawing.Color.Black;
-            this.guna2GroupBox3.Location = new System.Drawing.Point(6, 381);
+            this.guna2GroupBox3.Location = new System.Drawing.Point(11, 383);
             this.guna2GroupBox3.Name = "guna2GroupBox3";
-            this.guna2GroupBox3.Size = new System.Drawing.Size(846, 120);
+            this.guna2GroupBox3.Size = new System.Drawing.Size(912, 118);
             this.guna2GroupBox3.TabIndex = 30;
             this.guna2GroupBox3.Text = "Stored Procedures";
             // 
@@ -594,11 +596,12 @@
             this.btnGenerateStoredProceduresToAllTables.FillColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(126)))), ((int)(((byte)(205)))));
             this.btnGenerateStoredProceduresToAllTables.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold);
             this.btnGenerateStoredProceduresToAllTables.ForeColor = System.Drawing.Color.White;
-            this.btnGenerateStoredProceduresToAllTables.Location = new System.Drawing.Point(468, 62);
+            this.btnGenerateStoredProceduresToAllTables.Location = new System.Drawing.Point(487, 62);
             this.btnGenerateStoredProceduresToAllTables.Name = "btnGenerateStoredProceduresToAllTables";
             this.btnGenerateStoredProceduresToAllTables.Size = new System.Drawing.Size(369, 43);
             this.btnGenerateStoredProceduresToAllTables.TabIndex = 26;
             this.btnGenerateStoredProceduresToAllTables.Text = "Generate To All Tables";
+            this.btnGenerateStoredProceduresToAllTables.Click += new System.EventHandler(this.btnGenerateStoredProceduresToAllTables_Click);
             // 
             // brnGenerateStoredProceduresToSelectedTable
             // 
@@ -612,11 +615,12 @@
             this.brnGenerateStoredProceduresToSelectedTable.FillColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(126)))), ((int)(((byte)(205)))));
             this.brnGenerateStoredProceduresToSelectedTable.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold);
             this.brnGenerateStoredProceduresToSelectedTable.ForeColor = System.Drawing.Color.White;
-            this.brnGenerateStoredProceduresToSelectedTable.Location = new System.Drawing.Point(7, 62);
+            this.brnGenerateStoredProceduresToSelectedTable.Location = new System.Drawing.Point(26, 62);
             this.brnGenerateStoredProceduresToSelectedTable.Name = "brnGenerateStoredProceduresToSelectedTable";
             this.brnGenerateStoredProceduresToSelectedTable.Size = new System.Drawing.Size(385, 43);
             this.brnGenerateStoredProceduresToSelectedTable.TabIndex = 25;
             this.brnGenerateStoredProceduresToSelectedTable.Text = "Generate To The Selected Table";
+            this.brnGenerateStoredProceduresToSelectedTable.Click += new System.EventHandler(this.brnGenerateStoredProceduresToSelectedTable_Click);
             // 
             // guna2GroupBox1
             // 
@@ -626,11 +630,11 @@
             this.guna2GroupBox1.Controls.Add(this.label2);
             this.guna2GroupBox1.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2GroupBox1.ForeColor = System.Drawing.Color.Black;
-            this.guna2GroupBox1.Location = new System.Drawing.Point(6, 6);
+            this.guna2GroupBox1.Location = new System.Drawing.Point(11, 6);
             this.guna2GroupBox1.Name = "guna2GroupBox1";
-            this.guna2GroupBox1.Size = new System.Drawing.Size(846, 98);
+            this.guna2GroupBox1.Size = new System.Drawing.Size(912, 98);
             this.guna2GroupBox1.TabIndex = 27;
-            this.guna2GroupBox1.Text = "Data Access Layer";
+            this.guna2GroupBox1.Text = "Generate Data Access Class In File Path";
             // 
             // btnGenerateDataAccess
             // 
@@ -645,11 +649,12 @@
             this.btnGenerateDataAccess.FillColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(126)))), ((int)(((byte)(205)))));
             this.btnGenerateDataAccess.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnGenerateDataAccess.ForeColor = System.Drawing.Color.White;
-            this.btnGenerateDataAccess.Location = new System.Drawing.Point(745, 60);
+            this.btnGenerateDataAccess.Location = new System.Drawing.Point(801, 68);
             this.btnGenerateDataAccess.Name = "btnGenerateDataAccess";
             this.btnGenerateDataAccess.Size = new System.Drawing.Size(92, 27);
             this.btnGenerateDataAccess.TabIndex = 25;
             this.btnGenerateDataAccess.Text = "Generate";
+            this.btnGenerateDataAccess.Click += new System.EventHandler(this.btnGenerateDataAccess_Click);
             // 
             // txtDataAccessPath
             // 
@@ -659,7 +664,7 @@
             this.txtDataAccessPath.Location = new System.Drawing.Point(55, 54);
             this.txtDataAccessPath.Multiline = true;
             this.txtDataAccessPath.Name = "txtDataAccessPath";
-            this.txtDataAccessPath.Size = new System.Drawing.Size(762, 30);
+            this.txtDataAccessPath.Size = new System.Drawing.Size(825, 30);
             this.txtDataAccessPath.TabIndex = 24;
             // 
             // label2
@@ -788,25 +793,25 @@
             // 
             this.DGVTablesName.AllowUserToAddRows = false;
             this.DGVTablesName.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle10.BackColor = System.Drawing.Color.White;
-            this.DGVTablesName.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle10;
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle11.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(88)))), ((int)(((byte)(255)))));
-            dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle11.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.DGVTablesName.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle49.BackColor = System.Drawing.Color.White;
+            this.DGVTablesName.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle49;
+            dataGridViewCellStyle50.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle50.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(88)))), ((int)(((byte)(255)))));
+            dataGridViewCellStyle50.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle50.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle50.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle50.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle50.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.DGVTablesName.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle50;
             this.DGVTablesName.ColumnHeadersHeight = 4;
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle12.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle12.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(69)))), ((int)(((byte)(94)))));
-            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
-            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(69)))), ((int)(((byte)(94)))));
-            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.DGVTablesName.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle51.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle51.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle51.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle51.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(69)))), ((int)(((byte)(94)))));
+            dataGridViewCellStyle51.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
+            dataGridViewCellStyle51.SelectionForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(69)))), ((int)(((byte)(94)))));
+            dataGridViewCellStyle51.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.DGVTablesName.DefaultCellStyle = dataGridViewCellStyle51;
             this.DGVTablesName.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
             this.DGVTablesName.Location = new System.Drawing.Point(15, 154);
             this.DGVTablesName.Name = "DGVTablesName";
