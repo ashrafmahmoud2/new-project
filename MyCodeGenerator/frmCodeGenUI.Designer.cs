@@ -233,13 +233,14 @@
             this.btnGenerateDataAccessHelper.DisabledState.FillColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnGenerateDataAccessHelper.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
             this.btnGenerateDataAccessHelper.FillColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(179)))), ((int)(((byte)(126)))), ((int)(((byte)(205)))));
-            this.btnGenerateDataAccessHelper.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnGenerateDataAccessHelper.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnGenerateDataAccessHelper.ForeColor = System.Drawing.Color.White;
             this.btnGenerateDataAccessHelper.Location = new System.Drawing.Point(283, 456);
             this.btnGenerateDataAccessHelper.Name = "btnGenerateDataAccessHelper";
             this.btnGenerateDataAccessHelper.Size = new System.Drawing.Size(304, 45);
             this.btnGenerateDataAccessHelper.TabIndex = 40;
-            this.btnGenerateDataAccessHelper.Text = "Generate Data Access Helper";
+            this.btnGenerateDataAccessHelper.Text = "Generate Delegate Helper Methods";
+            this.btnGenerateDataAccessHelper.Click += new System.EventHandler(this.btnGenerateDataAccessHelper_Click);
             // 
             // GenerateLogHandler
             // 
@@ -258,6 +259,7 @@
             this.GenerateLogHandler.Size = new System.Drawing.Size(304, 45);
             this.GenerateLogHandler.TabIndex = 39;
             this.GenerateLogHandler.Text = "Generate Log Handler";
+            this.GenerateLogHandler.Click += new System.EventHandler(this.GenerateLogHandler_Click);
             // 
             // btnGenerateErrorLogger
             // 
@@ -276,6 +278,7 @@
             this.btnGenerateErrorLogger.Size = new System.Drawing.Size(304, 45);
             this.btnGenerateErrorLogger.TabIndex = 38;
             this.btnGenerateErrorLogger.Text = "Generate Error Logger";
+            this.btnGenerateErrorLogger.Click += new System.EventHandler(this.btnGenerateErrorLogger_Click);
             // 
             // btnGenerateDataAccessSettings
             // 

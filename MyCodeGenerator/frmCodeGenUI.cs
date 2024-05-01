@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using CodeGenBusinessLayer;
+using CodeGenDataLayer;
 using GenerateDataAccessLayerLibrary;
 
 namespace MyCodeGenerator
@@ -12,7 +13,7 @@ namespace MyCodeGenerator
     {
         private string _tableName = string.Empty;
         private List<List<clsColumnInfoForDataAccess>>
-            _columnsInfoForDataAccess = new List<List<clsColumnInfoForDataAccess>>();
+        _columnsInfoForDataAccess = new List<List<clsColumnInfoForDataAccess>>();
 
         public void DummyData()
         {
@@ -34,7 +35,6 @@ namespace MyCodeGenerator
                 //    Console.WriteLine($"Column Name: {columnName}, Data Type: {dataType}, Is Nullable: {isNullable}");
             }
         }
-
 
         public frmCodeGenUI()
         {
@@ -132,7 +132,8 @@ namespace MyCodeGenerator
         private void _Reset()
         {
             comboDatabaseName.SelectedIndex = -1;
-           // listviewColumnsInfo.Items.Clear();
+            // listviewColumnsInfo.Items.Clear();
+            DGVTableInfo.DataSource = null;
             DGVTablesName.DataSource = null;
             txtGenText.Clear();
             lblNumberOfColumnsRecords.Text = "0";
@@ -265,6 +266,47 @@ namespace MyCodeGenerator
                     GenerateStoredProcedure(comboDatabaseName.Text, _columnsInfoForDataAccess);
 
             }
+        }
+
+        private void btnGenerateErrorLogger_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(comboDatabaseName.SelectedItem?.ToString()))
+            {
+                MessageBox.Show("You should choose a database.", "Information", MessageBoxButtons.OK, 
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+           txtGenText.Text=
+                clsSQL.GenerateErrorLogger(comboDatabaseName.SelectedItem.ToString());
+        }
+
+        private void GenerateLogHandler_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(comboDatabaseName.SelectedItem?.ToString()))
+            {
+                MessageBox.Show("You should choose a database.", "Information", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            txtGenText.Text =
+
+           clsSQL.GenerateLogHandler(comboDatabaseName.SelectedItem.ToString());
+        }
+
+        private void btnGenerateDataAccessHelper_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(comboDatabaseName.SelectedItem?.ToString()))
+            {
+                MessageBox.Show("You should choose a database.", "Information", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+            
+            txtGenText.Text =
+
+           clsSQL.GenerateDelegateHelperMethods(comboDatabaseName.SelectedItem.ToString());
         }
     }
 }

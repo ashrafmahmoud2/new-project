@@ -51,6 +51,19 @@ namespace CodeGenBusinessLayer
             return
                 clsSQLDate.GenerateGenerateStoredProcedure(columnInfo, dbName);
         }
+       
+        public static string GenerateErrorLogger(string DBName)
+        {
+            return clsSQLDate.GenerateErrorLogger(DBName);
+        }
+        public static string GenerateLogHandler(string DBName)
+        {
+            return clsSQLDate.GenerateLogHandler(DBName);
+        }
+        public static string GenerateDelegateHelperMethods(string DBName)
+        {
+            return clsSQLDate.GenerateDelegateHelperMethods(DBName);
+        }
 
     }
 }
